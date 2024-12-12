@@ -1,0 +1,6433 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Cursuri ABD</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 500px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 30px;
+    }
+
+    .quiz-section {
+      display: none;
+    }
+
+    .quiz-section.active {
+      display: block;
+    }
+
+    .question {
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+
+    .answer {
+      display: flex;
+      align-items: center;
+      margin: 12px 0;
+    }
+
+    .answer input {
+      margin-right: 15px;
+    }
+
+    .answer span {
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .feedback {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .next-btn {
+      margin-top: 20px;
+      padding: 12px 25px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      background-color: #4caf50;
+      color: white;
+      border-radius: 4px;
+    }
+
+    .select-course {
+      margin-bottom: 20px;
+    }
+
+    select {
+      padding: 10px;
+      font-size: 18px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 12px 30px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .question-info {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="select-course" id="courseSelection">
+      <label for="courseSelect">Alegeți un curs:</label>
+      <select id="courseSelect">
+        <option value="2020-2021.json">Grile 2020-2021</option>
+        <option value="partial.json">Grile partial</option>
+      </select>
+      <div>
+        <input type="checkbox" id="randomToggle" checked />
+        <label for="randomToggle">Întrebări în ordine aleatorie</label>
+      </div>
+      <div>
+        <input type="checkbox" id="answerRandomToggle" checked />
+        <label for="answerRandomToggle">Răspunsuri în ordine aleatorie</label>
+      </div>
+      <button onclick="loadQuiz()">Încarcă întrebările</button>
+    </div>
+    <div id="quiz-container"></div>
+  </div>
+
+  <script>
+    let A = [
+      {
+        "question": "Când se creează un user Oracle trebuie specificat obligatoriu în comanda de creare:",
+        "answers": [
+          {
+            "text": "Tablespace-ul permanent asignat userului și eventual spațiul alocat în acest tablespace",
+            "correct": true
+          },
+          {
+            "text": "Parola de conexiune la baza de date",
+            "correct": false
+          },
+          {
+            "text": "Ambele clauze specificate la a și b",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Structura tabelară a unei tabele se poate vedea în dicționarul bazei de date Oracle în:",
+        "answers": [
+          {
+            "text": "USER_TAB_COLUMNS",
+            "correct": true
+          },
+          {
+            "text": "ALL_TABLES",
+            "correct": false
+          },
+          {
+            "text": "USER_TABLES",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care dintre următoarele privilegii pe obiecte se pot acorda unui user Oracle:",
+        "answers": [
+          {
+            "text": "Modificare structură tabelă și execuție procedură stocată",
+            "correct": false
+          },
+          {
+            "text": "Interogare pe un view și o secvență",
+            "correct": false
+          },
+          {
+            "text": "Toate privilegiile specificate la a și b",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Pentru a vedea dacă un tablespace Oracle este autoextensibil se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "DATABASE_PROPERTIES",
+            "correct": false
+          },
+          {
+            "text": "V$DATABASE",
+            "correct": false
+          },
+          {
+            "text": "DBA_DATA_FILES",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Crearea unei baze de date Oracle se poate face folosind credentialele userilor:",
+        "answers": [
+          {
+            "text": "SYS",
+            "correct": true
+          },
+          {
+            "text": "SYSDBA",
+            "correct": false
+          },
+          {
+            "text": "Ambii useri specificați la a și b pot fi folosiți deoarece sunt useri de sistem",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care dintre următoarele opțiuni permit unui user Oracle care primește un privilegiu de modificare de date pe o tabelă, să-l transmită unui alt user:",
+        "answers": [
+          {
+            "text": "GRANT ANY OBJECT PRIVILEGE",
+            "correct": false
+          },
+          {
+            "text": "GRANT ...WITH ADMIN OPTION",
+            "correct": false
+          },
+          {
+            "text": "Ambele variante specificate la a și b creează permisiunea",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Numele fișierelor de log folosite de o bază de date Oracle pot fi aflate din:",
+        "answers": [
+          {
+            "text": "V$DATABASE sau V$LOGFILE",
+            "correct": true
+          },
+          {
+            "text": "V$INSTANCE",
+            "correct": false
+          },
+          {
+            "text": "V$LOGFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla dimensiunea în blocuri a fișierelor de control dintr-o bază de date Oracle poate fi folosit view-ul dinamic:",
+        "answers": [
+          {
+            "text": "V$PARAMETER",
+            "correct": false
+          },
+          {
+            "text": "V$CONTROLFILE",
+            "correct": true
+          },
+          {
+            "text": "V$CONTROLFILE_RECORD_SECTION",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Parametrul PCTFREE al unui bloc de date Oracle reprezintă:",
+        "answers": [
+          {
+            "text": "Procentul de spațiu care poate fi folosit într-un bloc de date",
+            "correct": false
+          },
+          {
+            "text": "Procentul rezervat pentru creșterea spațiului de stocare alocat liniilor din blocul respectiv în urma operațiilor de update pe acele linii",
+            "correct": true
+          },
+          {
+            "text": "Procentul de spațiu liber curent din blocul respectiv",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru vizualizarea segmentelor de undo utilizate în sesiunea curentă se poate folosi view-ul:",
+        "answers": [
+          {
+            "text": "V$USER",
+            "correct": false
+          },
+          {
+            "text": "V$ROLLNAME",
+            "correct": true
+          },
+          {
+            "text": "V$DATABASE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "În care dintre următoarele operații se folosesc segmentele de tip undo într-o bază de date Oracle:",
+        "answers": [
+          {
+            "text": "Creare de copii ale tabelelor în baza de date",
+            "correct": false
+          },
+          {
+            "text": "Modificare și ștergere de date în baza de date",
+            "correct": false
+          },
+          {
+            "text": "În toate operațiile specificate la a și b",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Pe tabelele stocate într-un tablespace permanent dintr-o bază de date Oracle, aflat în starea OFF LINE, se pot face:",
+        "answers": [
+          {
+            "text": "Numai operații de citire de date",
+            "correct": false
+          },
+          {
+            "text": "Nu se poate face nicio operație deoarece se generează o eroare",
+            "correct": true
+          },
+          {
+            "text": "Numai operații de modificare de date",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru administrarea automată a segmentelor de tip undo dintr-o bază de date Oracle, este necesară:",
+        "answers": [
+          {
+            "text": "Existența unui tablespace de tip undo",
+            "correct": false
+          },
+          {
+            "text": "Alocarea unui tablespace de tip undo la instanța curentă",
+            "correct": false
+          },
+          {
+            "text": "Ambele condiții specificate la a și b sunt necesare",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Pentru a face o listă cu fișierele temporare create într-o bază de date Oracle și starea lor, se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "V$DATAFILE",
+            "correct": false
+          },
+          {
+            "text": "V$TEMPFILE",
+            "correct": true
+          },
+          {
+            "text": "DBA_DATA_FILES",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fișierele de control care se creează într-o bază de date Oracle pot fi specificate folosind comenzile:",
+        "answers": [
+          {
+            "text": "CREATE DATABASE",
+            "correct": false
+          },
+          {
+            "text": "ALTER SYSTEM",
+            "correct": false
+          },
+          {
+            "text": "Ambele comenzi specificate la a și b pot fi folosite, în funcție de context",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace temporar dintr-o bază de date Oracle poate stoca:",
+        "answers": [
+          {
+            "text": "Segmente permanente și temporare",
+            "correct": false
+          },
+          {
+            "text": "Segmente undo și temporare",
+            "correct": false
+          },
+          {
+            "text": "Segmente temporare",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla care membri ai unui grup din fișierele de log dintr-o bază de date Oracle sunt inactivi, se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "V$LOGFILE",
+            "correct": false
+          },
+          {
+            "text": "V$LOG",
+            "correct": true
+          },
+          {
+            "text": "V$THREAD",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dacă spațiul liber dintr-un bloc de date Oracle este sub procentul specificat de parametrul PCTFREE, în blocul respectiv:",
+        "answers": [
+          {
+            "text": "Se continuă inserarea și modificarea de date",
+            "correct": false
+          },
+          {
+            "text": "Se pot face numai modificări de date",
+            "correct": false
+          },
+          {
+            "text": "Nu se mai fac inserări și modificări de date",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "La startarea unei instanțe Oracle, parametrii de inițializare pot fi preluați din:",
+        "answers": [
+          {
+            "text": "Fișierul persistent SPFILE",
+            "correct": true
+          },
+          {
+            "text": "Fișierele de log",
+            "correct": false
+          },
+          {
+            "text": "Fișierele de date",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a face o listă cu numele instanței curente și grupurile fișierelor de log aflate în starea OPEN într-o bază de date Oracle, se execută o cerere SELECT pe:",
+        "answers": [
+          {
+            "text": "V$INSTANCE",
+            "correct": false
+          },
+          {
+            "text": "V$THREAD",
+            "correct": false
+          },
+          {
+            "text": "V$LOG și V$INSTANCE",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Când o tranzacție este comisă (COMMIT) se scriu pe disc:",
+        "answers": [
+          {
+            "text": "Înregistrări din Instant Memory",
+            "correct": false
+          },
+          {
+            "text": "Înregistrări din Redo Log",
+            "correct": true
+          },
+          {
+            "text": "Blocurile de date modificate",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Prin intermediul profilului se pot restricționa printre altele:",
+        "answers": [
+          {
+            "text": "Resurse referitoare la sistem și la parolă",
+            "correct": true
+          },
+          {
+            "text": "Numărul de procese de background per user",
+            "correct": false
+          },
+          {
+            "text": "Resurse referitoare la spațiul alocat pe disc",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Discretizarea face parte din etapa de:",
+        "answers": [
+          {
+            "text": "Extragerea modelelor și descoperirea cunoștințelor",
+            "correct": false
+          },
+          {
+            "text": "Vizualizare",
+            "correct": false
+          },
+          {
+            "text": "Preprocesarea datelor",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un nou fișier de date se poate adăuga folosind comanda:",
+        "answers": [
+          {
+            "text": "ALTER SEGMENT ...",
+            "correct": false
+          },
+          {
+            "text": "ALTER TABLESPACE ...",
+            "correct": true
+          },
+          {
+            "text": "ALTER EXTENT ...",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Clauza AUTOEXTEND permite creșterea dimensiunii:",
+        "answers": [
+          {
+            "text": "Segmentelor",
+            "correct": false
+          },
+          {
+            "text": "Fișierelor de date",
+            "correct": true
+          },
+          {
+            "text": "Extensiilor",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "“Binning”: dacă avem o cutie (“bin”) conținând valorile 4, 8, 9, 15, prin netezirea folosind capetele intervalului obținem:",
+        "answers": [
+          {
+            "text": "4, 4, 15, 15",
+            "correct": false
+          },
+          {
+            "text": "4, 4, 4, 15",
+            "correct": true
+          },
+          {
+            "text": "9, 9, 9, 9",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Sumarul de 5 numere (Five number summary) conține printre altele:",
+        "answers": [
+          {
+            "text": "Cuartilele și Cvintilele",
+            "correct": false
+          },
+          {
+            "text": "Minimul și maximul",
+            "correct": true
+          },
+          {
+            "text": "Media și mediana",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "În cazul lansării unei operații de oprire a bazei de date, sunt permise noi conexiuni în cazul opririi:",
+        "answers": [
+          {
+            "text": "Normale",
+            "correct": false
+          },
+          {
+            "text": "Nu se mai permit noi conexiuni",
+            "correct": true
+          },
+          {
+            "text": "Tranzacționale",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care afirmație este adevărată:",
+        "answers": [
+          {
+            "text": "Clauza LOGGING din CREATE TABLESPACE are prioritate față de un NOLOGGING de la crearea unei tabele în acel tablespace.",
+            "correct": false
+          },
+          {
+            "text": "Dacă există o diferență LOGGING – NOLOGGING între tabelă și tablespace automat se consideră LOGGING",
+            "correct": false
+          },
+          {
+            "text": "Clauza LOGGING din CREATE TABLE are prioritate față de un NOLOGGING al tablespace-ului în care se pune tabela.",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace poate fi de unul din tipurile:",
+        "answers": [
+          {
+            "text": "Permanent, Online, Offline",
+            "correct": false
+          },
+          {
+            "text": "Permanent, Temporar, Offline",
+            "correct": false
+          },
+          {
+            "text": "Permanent, Temporar, Undo",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "În cazul cererii CREATE TABLE, suma dintre PCTFREE și PCTUSED trebuie să fie:",
+        "answers": [
+          {
+            "text": "Între 1 și 198",
+            "correct": false
+          },
+          {
+            "text": "Între 1 și 100",
+            "correct": true
+          },
+          {
+            "text": "Între 1 și 99",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Clauza DEFAULT STORAGE are efect în dimensionarea:",
+        "answers": [
+          {
+            "text": "Extensiilor",
+            "correct": true
+          },
+          {
+            "text": "Tablespace-urilor",
+            "correct": false
+          },
+          {
+            "text": "Segmentelor",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dacă INITIAL este 10M, NEXT este 20M, PCTINCREASE este 50 atunci extensia 3 va avea:",
+        "answers": [
+          {
+            "text": "15M",
+            "correct": false
+          },
+          {
+            "text": "45M",
+            "correct": true
+          },
+          {
+            "text": "30M",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "În cazul unui user identificat prin parolă, care dintre parolele de mai jos este greșită:",
+        "answers": [
+          {
+            "text": "A12345678901234567891234567890",
+            "correct": false
+          },
+          {
+            "text": "PA_$#ROLA$#_USER12345678901234",
+            "correct": false
+          },
+          {
+            "text": "PAROLA_USER_1_1234%67890123",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "În cazul tabelelor de tip cluster (clustered tables):",
+        "answers": [
+          {
+            "text": "Înregistrările sunt organizate ca arbore B",
+            "correct": false
+          },
+          {
+            "text": "Acestea sunt parte a unui grup de tabele având în comun anumite coloane",
+            "correct": true
+          },
+          {
+            "text": "Liniile sunt împărțite în mai multe grupuri",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Algoritmii de clustering sunt de tipul:",
+        "answers": [
+          {
+            "text": "Prescriptiv",
+            "correct": false
+          },
+          {
+            "text": "Predictiv",
+            "correct": false
+          },
+          {
+            "text": "Descriptiv",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "La trecerea unui tablespace OFFLINE se pot folosi parametrii:",
+        "answers": [
+          {
+            "text": "NORMAL și FLASHBACK",
+            "correct": false
+          },
+          {
+            "text": "TEMPORARY și UNIFORM",
+            "correct": false
+          },
+          {
+            "text": "NORMAL și IMMEDIATE",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "DMT înseamnă:",
+        "answers": [
+          {
+            "text": "Dictionary merged tablespace",
+            "correct": false
+          },
+          {
+            "text": "Data managed tablespace",
+            "correct": false
+          },
+          {
+            "text": "Dictionary managed tablespace",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Valoarea curentă (FALSE) a lui RESOURCE_LIMIT se poate modifica prin:",
+        "answers": [
+          {
+            "text": "ALTER SESSION SET RESOURCE_LIMIT=TRUE",
+            "correct": false
+          },
+          {
+            "text": "ALTER USER SET RESOURCE_LIMIT=TRUE",
+            "correct": false
+          },
+          {
+            "text": "ALTER SYSTEM SET RESOURCE_LIMIT=TRUE",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Putem vedea dacă modul curent de lucru este RESTRICTED consultând:",
+        "answers": [
+          {
+            "text": "V$CONTROLFILE",
+            "correct": false
+          },
+          {
+            "text": "V$INSTANCE",
+            "correct": true
+          },
+          {
+            "text": "V$SESSION",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru recunoașterea punctelor izolate (outliers) se folosește valoarea 1,5 * IQR. În acest caz, cât ar trebui să fie X din mulțimea {0, 1, 2, X} pentru a fi considerat punct izolat:",
+        "answers": [
+          {
+            "text": "-2.5",
+            "correct": false
+          },
+          {
+            "text": "5.5",
+            "correct": true
+          },
+          {
+            "text": "-1.5",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Când cota unui user într-un tablespace e trecută pe o valoare mai mică decât spațiul ocupat:",
+        "answers": [
+          {
+            "text": "Nu se mai pot crea obiecte noi dar cele existente pot crește",
+            "correct": false
+          },
+          {
+            "text": "Nu se mai pot crea obiecte noi iar cele existente nu pot crește",
+            "correct": true
+          },
+          {
+            "text": "Se pot crea obiecte noi dar cele existente nu mai pot crește",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numărul minim de fișiere de tip Fisier de Redo Log este:",
+        "answers": [
+          {
+            "text": "Unul",
+            "correct": false
+          },
+          {
+            "text": "Nu există o valoare minimă",
+            "correct": false
+          },
+          {
+            "text": "Două",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "La închiderea bazei de date blocurile de date modificate din memorie sunt scrise pe disc de:",
+        "answers": [
+          {
+            "text": "Procesul Checkpoint (CKPT)",
+            "correct": false
+          },
+          {
+            "text": "Procesul Database Writer (DBWn)",
+            "correct": true
+          },
+          {
+            "text": "Procesul Checkpoint (CKPT)",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Parametrul LOG_CHECKPOINT_TIMEOUT se măsoară în:",
+        "answers": [
+          {
+            "text": "Minute",
+            "correct": false
+          },
+          {
+            "text": "Secunde",
+            "correct": true
+          },
+          {
+            "text": "Blocuri",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fișierele de control sunt scrise:",
+        "answers": [
+          {
+            "text": "În paralel (multiplexat)",
+            "correct": true
+          },
+          {
+            "text": "În serie (unul după altul)",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "În momentul blocării unui cont (LOCK), dacă userul e logat la acel moment:",
+        "answers": [
+          {
+            "text": "Sesiunea va fi afectată de schimbare",
+            "correct": false
+          },
+          {
+            "text": "Sesiunea nu va fi afectată de schimbare",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Numărul de blocuri de date din Database Buffer Cache este dat de:",
+        "answers": [
+          {
+            "text": "LOG_BUFFER",
+            "correct": false
+          },
+          {
+            "text": "DB_BLOCK_BUFFERS",
+            "correct": true
+          },
+          {
+            "text": "DB_BLOCK_SIZE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Vederile dinamice pentru performanțe se pot consulta:",
+        "answers": [
+          {
+            "text": "Unele dintre ele după pornirea instanței",
+            "correct": true
+          },
+          {
+            "text": "Doar după montarea BD",
+            "correct": false
+          },
+          {
+            "text": "Doar după deschiderea BD",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Procesul Log Writer scrie pe disc:",
+        "answers": [
+          {
+            "text": "În același timp cu DBWRITER",
+            "correct": false
+          },
+          {
+            "text": "Înainte ca DBWRITER să scrie pe disc",
+            "correct": true
+          },
+          {
+            "text": "După ce DBWRITER scrie pe disc",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Algoritmii de clasificare sunt de tipul:",
+        "answers": [
+          {
+            "text": "Descriptiv",
+            "correct": false
+          },
+          {
+            "text": "Predictiv",
+            "correct": true
+          },
+          {
+            "text": "Prescriptiv",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Crearea unei baze de date se face:",
+        "answers": [
+          {
+            "text": "Cu instanța pornită",
+            "correct": true
+          },
+          {
+            "text": "Cu baza de date montată",
+            "correct": false
+          },
+          {
+            "text": "Cu procesele de background oprite",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Procesul Archiver (ARCn):",
+        "answers": [
+          {
+            "text": "Copiază fișierele Redo Log în arhivă de pe disc",
+            "correct": true
+          },
+          {
+            "text": "Scrie periodic pe disc blocurile de date modificate",
+            "correct": false
+          },
+          {
+            "text": "Citește blocurile de date de modificat în memorie",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Forțarea unui log switch se face cu comanda:",
+        "answers": [
+          {
+            "text": "ALTER SYSTEM SWITCH LOGFILE",
+            "correct": true
+          },
+          {
+            "text": "ALTER DATABASE SWITCH LOGFILE",
+            "correct": false
+          },
+          {
+            "text": "ALTER SESSION SWITCH LOGFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numărul minim de fișiere de tip Fisier de Control este:",
+        "answers": [
+          {
+            "text": "Unul",
+            "correct": true
+          },
+          {
+            "text": "Două",
+            "correct": false
+          },
+          {
+            "text": "Nu există o valoare minimă",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Membrii unui grup de fișiere redo log sunt scriși:",
+        "answers": [
+          {
+            "text": "În serie (unul după altul)",
+            "correct": false
+          },
+          {
+            "text": "În paralel (multiplexat)",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Dacă este atinsă o limită a profilului la nivel de operație (call) atunci:",
+        "answers": [
+          {
+            "text": "Tranzacția curentă este anulată",
+            "correct": false
+          },
+          {
+            "text": "Doar operația curentă este anulată",
+            "correct": true
+          },
+          {
+            "text": "Userul e deconectat",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "În cazul cărei opriri nu sunt închise fișierele:",
+        "answers": [
+          {
+            "text": "Imediat și Abort",
+            "correct": false
+          },
+          {
+            "text": "Tranzacțional, Imediat și Abort",
+            "correct": false
+          },
+          {
+            "text": "Abort",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Valoarea implicită pentru INITRANS în cazul tabelelor este:",
+        "answers": [
+          {
+            "text": "1",
+            "correct": true
+          },
+          {
+            "text": "2",
+            "correct": false
+          },
+          {
+            "text": "255",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Lista cu fișierele de control se poate obține cu comanda:",
+        "answers": [
+          {
+            "text": "SELECT VALUE FROM V$PARAMETER WHERE NAME = 'control_files';",
+            "correct": false
+          },
+          {
+            "text": "SELECT MEMBER FROM V$LOGFILE;",
+            "correct": true
+          },
+          {
+            "text": "SELECT NAME FROM V$DATAFILE;",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un user poate avea in acelasi timp:",
+        "answers": [
+          {
+            "text": "Mai multe sesiuni deschise cu acelasi server Oracle",
+            "correct": true
+          },
+          {
+            "text": "O singura sesiune deschisa cu acelasi server Oracle",
+            "correct": false
+          },
+          {
+            "text": "Mai multe sesiuni deschise cu acelasi server Oracle doar in varianta Multithreaded Server",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Procesul System Monitor (SMON):",
+        "answers": [
+          {
+            "text": "Scrie periodic pe disc blocurile de date modificate",
+            "correct": false
+          },
+          {
+            "text": "Scrie periodic pe disc inregistrarile Redo Log modificate",
+            "correct": false
+          },
+          {
+            "text": "Este folosit pentru recuperarea dupa incident",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Dimensiunea blocului de date din Database Buffer Cache este dat de:",
+        "answers": [
+          {
+            "text": "DB_BLOCK_SIZE",
+            "correct": false
+          },
+          {
+            "text": "LOG_BUFFER",
+            "correct": false
+          },
+          {
+            "text": "DB_BLOCK_BUFFERS",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Dimensiunea zonei de memorie Redo Log Buffer e data de:",
+        "answers": [
+          {
+            "text": "DB_BLOCK_BUFFERS",
+            "correct": false
+          },
+          {
+            "text": "DB_BLOCK_SIZE",
+            "correct": false
+          },
+          {
+            "text": "LOG_BUFFER",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un user Oracle interactioneaza direct cu:",
+        "answers": [
+          {
+            "text": "Un proces user",
+            "correct": true
+          },
+          {
+            "text": "Un proces server",
+            "correct": false
+          },
+          {
+            "text": "Serverul Oracle",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "O instanta Oracle este compusa din:",
+        "answers": [
+          {
+            "text": "O zona de memorie numita SGA si procese slave",
+            "correct": false
+          },
+          {
+            "text": "O zona de memorie numita PGA si procese server",
+            "correct": false
+          },
+          {
+            "text": "O zona de memorie numita SGA si procese de background",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un proces server are la dispozitie o zona de memorie exclusiva numita:",
+        "answers": [
+          {
+            "text": "Shared Pool",
+            "correct": false
+          },
+          {
+            "text": "PGA",
+            "correct": true
+          },
+          {
+            "text": "SGA",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cursul nostru SCN inseamna:",
+        "answers": [
+          {
+            "text": "System Core Number",
+            "correct": false
+          },
+          {
+            "text": "Serial Change Number",
+            "correct": false
+          },
+          {
+            "text": "System Change Number",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Numarul minim de fisiere de tip Fisier de Control este:",
+        "answers": [
+          {
+            "text": "Unul",
+            "correct": true
+          },
+          {
+            "text": "Doua",
+            "correct": false
+          },
+          {
+            "text": "Nu exista o valoare minima",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un proces server lucreaza impreuna cu:",
+        "answers": [
+          {
+            "text": "Doar cu procesul user",
+            "correct": false
+          },
+          {
+            "text": "Doar cu serverul Oracle",
+            "correct": false
+          },
+          {
+            "text": "Si cu procesul user si cu serverul Oracle",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Vederile dinamice pentru performante se pot consulta:",
+        "answers": [
+          {
+            "text": "Doar dupa montarea BD",
+            "correct": false
+          },
+          {
+            "text": "Doar dupa deschiderea BD",
+            "correct": false
+          },
+          {
+            "text": "Unele dintre ele dupa pornirea instantei",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Montarea bazei de date se face:",
+        "answers": [
+          {
+            "text": "La montare se face implicit si pornirea instantei",
+            "correct": false
+          },
+          {
+            "text": "Dupa pornirea instantei",
+            "correct": true
+          },
+          {
+            "text": "Inainte de pornirea instantei",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Exista vederi dinamice care pot fi consultate cu instanta oprita?",
+        "answers": [
+          {
+            "text": "Da",
+            "correct": false
+          },
+          {
+            "text": "Nu",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Poti crea o baza de date daca esti :",
+        "answers": [
+          {
+            "text": "SYSDBA sau SYSOPER",
+            "correct": false
+          },
+          {
+            "text": "SYSDBA",
+            "correct": true
+          },
+          {
+            "text": "DBA",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "La executia comenzii ALTER SYSTEM ENABLE RESTRICTED SESSION sesiunile deja existente:",
+        "answers": [
+          {
+            "text": "Sunt oprite",
+            "correct": false
+          },
+          {
+            "text": "Raman active pana la terminarea lor",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Care afirmatie este corecta :",
+        "answers": [
+          {
+            "text": "Cand apare un checkpoint se face si un log-switch",
+            "correct": false
+          },
+          {
+            "text": "Cand apare un log-switch se face si un checkpoint",
+            "correct": true
+          },
+          {
+            "text": "Checkpoint si log-switch nu sunt corelate",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Lista cu fisierele de date se poate obtine cu comanda:",
+        "answers": [
+          {
+            "text": "SELECT MEMBER FROM V$LOGFILE;",
+            "correct": false
+          },
+          {
+            "text": "SELECT NAME FROM V$DATAFILE;",
+            "correct": true
+          },
+          {
+            "text": "SELECT VALUE FROM V$PARAMETER WHERE NAME = 'control_files';",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Lista cu fisierele de control se poate obtine cu comanda:",
+        "answers": [
+          {
+            "text": "SELECT MEMBER FROM V$LOGFILE;",
+            "correct": false
+          },
+          {
+            "text": "SELECT VALUE FROM V$PARAMETER WHERE NAME = 'control_files';",
+            "correct": true
+          },
+          {
+            "text": "SELECT NAME FROM V$DATAFILE;",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Redenumirea unui fisier de Redo Log presupune si executia cererii:",
+        "answers": [
+          {
+            "text": "ALTER SYSTEM RENAME REDOLOG FILE",
+            "correct": false
+          },
+          {
+            "text": "ALTER DATABASE RENAME REDOLOG FILE",
+            "correct": true
+          },
+          {
+            "text": "ALTER DATABASE RENAME FILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fisierele de control sunt scrise :",
+        "answers": [
+          {
+            "text": "In paralel (multiplexat)",
+            "correct": true
+          },
+          {
+            "text": "In serie (unul dupa altul)",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace poate fi de unul din tipurile:",
+        "answers": [
+          {
+            "text": "Permanent, Temporar, Offline",
+            "correct": false
+          },
+          {
+            "text": "Permanent, Temporar, Undo",
+            "correct": true
+          },
+          {
+            "text": "Permanent, Online, Offline",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "O baza de date contine un numar de tablespace:",
+        "answers": [
+          {
+            "text": ">=1",
+            "correct": true
+          },
+          {
+            "text": "<=1",
+            "correct": false
+          },
+          {
+            "text": "=1",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "LMT inseamna:",
+        "answers": [
+          {
+            "text": "Link managed tablespace",
+            "correct": false
+          },
+          {
+            "text": "Lower management for tablespaces",
+            "correct": false
+          },
+          {
+            "text": "Locally managed tablespace",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un fisier de date poate sa apartina:",
+        "answers": [
+          {
+            "text": "La doua tablespace-uri diferite",
+            "correct": false
+          },
+          {
+            "text": "Unui singur segment",
+            "correct": false
+          },
+          {
+            "text": "Unui singur tablespace",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Care element este o succesiune contigua de blocuri?",
+        "answers": [
+          {
+            "text": "Tablespace",
+            "correct": false
+          },
+          {
+            "text": "Extensie",
+            "correct": true
+          },
+          {
+            "text": "Segment",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Valoarea implicita pentru INITRANS in cazul tabelelor este:",
+        "answers": [
+          {
+            "text": "1",
+            "correct": true
+          },
+          {
+            "text": "255",
+            "correct": false
+          },
+          {
+            "text": "2",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul cererii CREATE TABLE, suma dintre PCTFREE si PCTUSED trebuie sa fie:",
+        "answers": [
+          {
+            "text": "Intre 1 si 100",
+            "correct": true
+          },
+          {
+            "text": "Intre 1 si 198",
+            "correct": false
+          },
+          {
+            "text": "Intre 1 si 99",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care afirmatie este adevarata:",
+        "answers": [
+          {
+            "text": "Clauza FORCE LOGGING din CREATE TABLESPACE are prioritate fata de un NOLOGGING de la crearea unei tabele in acel tablespace.",
+            "correct": true
+          },
+          {
+            "text": "Clauza NOLOGGING din CREATE TABLE are prioritate fata de un FORCE LOGGING al tablespace-ului in care se pune tabela.",
+            "correct": false
+          },
+          {
+            "text": "Daca exista o diferenta LOGGING – NOLOGGING intre tabela si tablespace automat se considera LOGGING",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Procesul prin care Oracle ia o linie dintr-un bloc si o muta in alt bloc, lasand in locul ei un pointer se numeste:",
+        "answers": [
+          {
+            "text": "Indexarea pointerilor",
+            "correct": false
+          },
+          {
+            "text": "Migrarea liniilor",
+            "correct": true
+          },
+          {
+            "text": "Inlantuirea liniilor (row chaining)",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Cand cota unui user este modificata la valoarea 0 (aceasta fiind o valoare mai mica decat spatiul ocupat la acel moment de acel user in acel tablespace) atunci in acel tablespace:",
+        "answers": [
+          {
+            "text": "Obiectele existente sunt sterse",
+            "correct": false
+          },
+          {
+            "text": "Tabelele existente sunt golite",
+            "correct": false
+          },
+          {
+            "text": "Nu se mai pot crea noi obiecte",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Prin intermediul profilului se pot restrictiona printre altele:",
+        "answers": [
+          {
+            "text": "Resurse referitoare la sistem si la parola",
+            "correct": false
+          },
+          {
+            "text": "Resurse referitoare la spatiul alocat pe disc",
+            "correct": true
+          },
+          {
+            "text": "Numarul de procese de background per user",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Prin comanda ALTER PROFILE se poate schimba:",
+        "answers": [
+          {
+            "text": "Cota pe disc a userului pe un tablespace",
+            "correct": false
+          },
+          {
+            "text": "Celelalte doua variante sunt false",
+            "correct": true
+          },
+          {
+            "text": "Numele userului",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul unui user identificat prin parola, care dintre parolele de mai jos este gresita:",
+        "answers": [
+          {
+            "text": "PA_$#ROLA$#_USER12345678901234",
+            "correct": false
+          },
+          {
+            "text": "PAROLA_USER_1_1234%67890123",
+            "correct": false
+          },
+          {
+            "text": "A12345678901234567891234567890",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Se pot asocia cote pentru utilizatori pe tablespace-urile temporare?",
+        "answers": [
+          {
+            "text": "Nu",
+            "correct": true
+          },
+          {
+            "text": "Da",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Algoritmii de clasificare sunt de tipul:",
+        "answers": [
+          {
+            "text": "Predictiv",
+            "correct": true
+          },
+          {
+            "text": "Prescriptiv",
+            "correct": false
+          },
+          {
+            "text": "Descriptiv",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Gradele militare sunt valori de tip:",
+        "answers": [
+          {
+            "text": "Interval",
+            "correct": false
+          },
+          {
+            "text": "Ordinal",
+            "correct": true
+          },
+          {
+            "text": "Nominal",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "În cazul căutării mulțimilor frecvente în datele de vânzări ale unui supermarket, reducerea dimensionalității (“Dimensionality reduction”) trebuie să păstreze:",
+        "answers": [
+          {
+            "text": "Furnizorul",
+            "correct": false
+          },
+          {
+            "text": "Prețul",
+            "correct": true
+          },
+          {
+            "text": "Produsul",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru recunoașterea punctelor izolate (outliers) se folosește valoarea 1,5 * IQR. In acest caz, cât ar trebui sa fie X din mulțimea {0, 1, 2, X} pentru a fi considerat punct izolat:",
+        "answers": [
+          {
+            "text": "5.5",
+            "correct": true
+          },
+          {
+            "text": "-1,5",
+            "correct": false
+          },
+          {
+            "text": "-2.5",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Varianța (Dispersia) este:",
+        "answers": [
+          {
+            "text": "Varianța nu este legata de abaterea standard sigma",
+            "correct": false
+          },
+          {
+            "text": "Radical din abaterea standard sigma",
+            "correct": false
+          },
+          {
+            "text": "Pătratul abaterii standard sigma",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Fie coloanele C1 = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] si C2 = [1, 0, 1, 0, 1, 0, 1, 0, 0, 0]. Atunci ele sunt:",
+        "answers": [
+          {
+            "text": "40% similare",
+            "correct": true
+          },
+          {
+            "text": "50% similare",
+            "correct": false
+          },
+          {
+            "text": "60% similare",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Daca in matricea de calcul a similaritatii liniile si coloanele sunt studenti si (I, J) = 1 daca studentul I are medie egala cu studentul J atunci daca doua coloane A si B sunt 100% similare atunci:",
+        "answers": [
+          {
+            "text": "A si B pot sa nu aiba medii egale",
+            "correct": false
+          },
+          {
+            "text": "A si B au medii egale",
+            "correct": true
+          },
+          {
+            "text": "Matricea e incorecta",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Procesul de background DBWR este folosit de o instanta Oracle pentru:",
+        "answers": [
+          {
+            "text": "Citirea si incarcarea in Database Buffer Cache a blocurilor de date din fisierele de date",
+            "correct": false
+          },
+          {
+            "text": "Scrierea blocurilor de date din Database Buffer Cache in fisierele de date",
+            "correct": true
+          },
+          {
+            "text": "Ambele variante prezentate la a si b sunt corecte",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla structura unei tabele din baza de date:",
+        "answers": [
+          {
+            "text": "Se poate face o interogare pe DBA_TAB_COLUMNS",
+            "correct": false
+          },
+          {
+            "text": "Se poate folosi comanda DESCRIBE",
+            "correct": false
+          },
+          {
+            "text": "Informatia se poate obtine prin ambele metode specificate la a si b",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Modificarea parametrilor unei baze de date Oracle se poate face cu comanda:",
+        "answers": [
+          {
+            "text": "ALTER DATABASE SET parameter_name = parameter_value",
+            "correct": false
+          },
+          {
+            "text": "ALTER TABLE V$PARAMETER SET parameter_name = parameter_value",
+            "correct": false
+          },
+          {
+            "text": "ALTER SYSTEM SET parameter_name = parameter_value",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Startarea bazei de date",
+        "answers": [
+          {
+            "text": "Conexiunea unui user la baza de date",
+            "correct": true
+          },
+          {
+            "text": "O instanta a bazei de date",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Crearea unei baze de date Oracle se poate face folosind credentialele userilor:",
+        "answers": [
+          {
+            "text": "SYS",
+            "correct": true
+          },
+          {
+            "text": "SYSDBA",
+            "correct": false
+          },
+          {
+            "text": "Ambii useri specificati la a si b pot fi folositi deoarece sunt useri de sistem",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Daca la instalarea Oracle database nu s-a creat nicio baza de date, se poate crea ulterior folosind:",
+        "answers": [
+          {
+            "text": "Comanda CREATE DATABASE la prima conexiune in SQL*Plus",
+            "correct": false
+          },
+          {
+            "text": "Utilitarul Database Configuration Assistant",
+            "correct": false
+          },
+          {
+            "text": "Ambele metode prezentate la a si b pot fi folosite",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Numele view_urilor dinamice din dictionarul bazei de date Oracle pot fi vizualitate printr-o interogare pe:",
+        "answers": [
+          {
+            "text": "USER_VIEWS",
+            "correct": false
+          },
+          {
+            "text": "ALL_VIEWS",
+            "correct": false
+          },
+          {
+            "text": "V$FIXED_TABLE",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Pentru a vedea parola unui user creat pe baza de date se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "ALL_USERS, dar numai de catre un user cu privilegiul DBA",
+            "correct": false
+          },
+          {
+            "text": "Informatia nu se poate obtine din baza de date",
+            "correct": true
+          },
+          {
+            "text": "DBA_USERS, dar numai de catre administratorul bazei de date",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla proprietarul si data la care a fost creata o tabela in baza de date se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "DBA_OBJECTS",
+            "correct": true
+          },
+          {
+            "text": "USER_TABLES",
+            "correct": false
+          },
+          {
+            "text": "Informatia se poate obtine din ambele view-uri specificate la a si b",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Structura tabelara a unei tabele se poate vedea in dictionarul bazei de date Oracle in:",
+        "answers": [
+          {
+            "text": "ALL_TABLES",
+            "correct": false
+          },
+          {
+            "text": "USER_TABLES",
+            "correct": false
+          },
+          {
+            "text": "USER_TAB_COLUMNS",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Fisierele de log care se creeaza intr-o baza de date Oracle pot fi specificate folosind comenzile:",
+        "answers": [
+          {
+            "text": "CREATE DATABASE",
+            "correct": false
+          },
+          {
+            "text": "ALTER DATABASE",
+            "correct": false
+          },
+          {
+            "text": "Ambele comenzi specificate la a si b pot fi folosite, in functie de context",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Numele fisierelor de log folosite de o baza de date Oracle pot fi aflate din:",
+        "answers": [
+          {
+            "text": "V$INSTANCE",
+            "correct": false
+          },
+          {
+            "text": "V$LOGFILE",
+            "correct": true
+          },
+          {
+            "text": "V$DATABASE sau V$LOGFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla care membri ai unui grup din fisierele de log dintr-o baza de date Oracle sunt inactivi, se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "V$LOGFILE",
+            "correct": false
+          },
+          {
+            "text": "V$LOG",
+            "correct": true
+          },
+          {
+            "text": "V$THREAD",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla dimensiunea in blocuri a fisierelor de control dintr-o baza de date Oracle poate fi folosit view-ul dinamic:",
+        "answers": [
+          {
+            "text": "V$PARAMETER",
+            "correct": false
+          },
+          {
+            "text": "V$CONTROLFILE_RECORD_SECTION",
+            "correct": true
+          },
+          {
+            "text": "V$CONTROLFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a face o lista cu numele fisierelor de log dintr-o baza de date Oracle, fisierele membru si dimensiunea lor se executa o cerere SELECT pe:",
+        "answers": [
+          {
+            "text": "V$LOG si V$THREAD",
+            "correct": false
+          },
+          {
+            "text": "V$LOGFILE si V$LOG",
+            "correct": true
+          },
+          {
+            "text": "V$LOG si V$INSTANCE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numele si calea fisierelor de control create intr-o baza de date Oracle pot fi aflate din urmatoarele view-uri:",
+        "answers": [
+          {
+            "text": "V$PARAMETER",
+            "correct": false
+          },
+          {
+            "text": "V$CONTROLFILE",
+            "correct": false
+          },
+          {
+            "text": "Ambele view-uri specificate la a si b contin aceasta informatie",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Numele si calea fisierelor temporare folosite de o baza de date Oracle pot fi aflate folosind:",
+        "answers": [
+          {
+            "text": "Interogare pe V$TEMPFILE",
+            "correct": true
+          },
+          {
+            "text": "Interogare pe V$CONTROLFILE",
+            "correct": false
+          },
+          {
+            "text": "Interogare pe V$DATABASE sau V$TEMPFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numele si calea fisierelor de log folosite de o baza de date Oracle pot fi aflate folosind:",
+        "answers": [
+          {
+            "text": "Interogare pe V$LOGFILE sau comanda SHOW PARAMETER",
+            "correct": false
+          },
+          {
+            "text": "Interogare pe V$LOGFILE",
+            "correct": true
+          },
+          {
+            "text": "Interogare pe V$PARAMETER",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla care este grupul curent al fisierelor de log dintr-o baza de date Oracle se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "V$THREAD",
+            "correct": true
+          },
+          {
+            "text": "V$DATABASE sau V$LOGFILE",
+            "correct": false
+          },
+          {
+            "text": "V$LOGFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla care este membrul curent al unui grup din fisierele de log dintr-o baza de date Oracle, se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "V$INSTANCE",
+            "correct": false
+          },
+          {
+            "text": "V$LOG",
+            "correct": true
+          },
+          {
+            "text": "V$LOGFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Obiectele din dictionarul bazei de date Oracle sunt create in tablespace-uri de tip:",
+        "answers": [
+          {
+            "text": "NON SYSTEM",
+            "correct": false
+          },
+          {
+            "text": "SYSTEM",
+            "correct": false
+          },
+          {
+            "text": "Ambele tipuri specificate la a si b pot fi folosite, in functie de context",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Intr-o baza de date Oracle segmentele pot fi:",
+        "answers": [
+          {
+            "text": "Tabele permanente si tabele temporare",
+            "correct": false
+          },
+          {
+            "text": "Indecsi si view-uri",
+            "correct": false
+          },
+          {
+            "text": "Toate obiectele specificate la a si b",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace creat intr-o baza de date Oracle cu optiunea AUTOALLOCATE poate fi extins de catre:",
+        "answers": [
+          {
+            "text": "Sistemul de gestiune a bazei de date",
+            "correct": true
+          },
+          {
+            "text": "Un user comun cu privilegiul DBA",
+            "correct": false
+          },
+          {
+            "text": "Ambele tipuri de useri specificati la a si b, in functie de context",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a specifica o extensie la spatiul de stocare al unui tablespace creat cu optiunea EXTENT LOCAL MANAGEMENT intr-o baza de date Oracle, se poate folosi comanda:",
+        "answers": [
+          {
+            "text": "CREATE TABLESPACE",
+            "correct": true
+          },
+          {
+            "text": "ALTER TABLESPACE",
+            "correct": false
+          },
+          {
+            "text": "Ambele comenzi specificate la a si b pot fi utilizate",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru unificarea spatiilor contigue dintr-un tablespace(defragmentare) al unei baze de date Oracle se foloseste comanda:",
+        "answers": [
+          {
+            "text": "ALTER SYSTEM",
+            "correct": false
+          },
+          {
+            "text": "CREATE TABLESPACE",
+            "correct": false
+          },
+          {
+            "text": "ALTER TABLESPACE",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla din dictionarul bazei de date Oracle care sunt indecsii creati pe tabelele din userul curent, in ce tablespace sunt creati si cate blocuri le sunt alocate, se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "DBA_INDEXES si USER_USERS",
+            "correct": false
+          },
+          {
+            "text": "DBA_SEGMENTS si DBA_USERS",
+            "correct": true
+          },
+          {
+            "text": "DBA_FREE_SPACE si USER_USERS",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In segmentele stocate intr-un tablespace permanent dintr-o baza de date Oracle, trecut in starea READ ONLY, se pot face operatii de:",
+        "answers": [
+          {
+            "text": "Citire de date",
+            "correct": true
+          },
+          {
+            "text": "Scriere de date pana la terminarea tranzactiilor in desfasurare",
+            "correct": false
+          },
+          {
+            "text": "Ambele tipuri de operatii specificate la a si b",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Tabelele create de un user intr-o baza de date Oracle pot fi create intr-un tablespace:",
+        "answers": [
+          {
+            "text": "Permanent",
+            "correct": false
+          },
+          {
+            "text": "Temporar",
+            "correct": false
+          },
+          {
+            "text": "Ambele tipuri de tablespace-uri specificate la a si b, in functie de context",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Pentru a face o lista cu fisierele temporare create intr-o baza de date Oracle si starea lor, se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "V$TEMPFILE",
+            "correct": true
+          },
+          {
+            "text": "DBA_DATA_FILES",
+            "correct": false
+          },
+          {
+            "text": "V$DATAFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla din dictionarul bazei de date Oracle care este spatiul liber, ca numar de blocuri, in tablespace-ul permanent aferent userului curent, se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "DBA_SEGMENTS si DBA_USERS",
+            "correct": false
+          },
+          {
+            "text": "DBA_TABLESPACES si USER_USERS",
+            "correct": false
+          },
+          {
+            "text": "DBA_FREE_SPACE si USER_USERS",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Structura tabelara a unei tabele se poate vedea in dictionarul bazei de date Oracle in:",
+        "answers": [
+          {
+            "text": "USER_TAB_COLUMNS",
+            "correct": true
+          },
+          {
+            "text": "USER_TABLES",
+            "correct": false
+          },
+          {
+            "text": "ALL_TABLES",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Spatiul alocat pentru zona de memorie Database Buffers din sesiunea curenta, se poate vedea printr-o interogare pe:",
+        "answers": [
+          {
+            "text": "V$SGA",
+            "correct": true
+          },
+          {
+            "text": "V$SESSION",
+            "correct": false
+          },
+          {
+            "text": "V$CONTROLFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Crearea unei baze de date Oracle se poate face folosind credentialele userilor:",
+        "answers": [
+          {
+            "text": "SYS",
+            "correct": true
+          },
+          {
+            "text": "SYSDBA",
+            "correct": false
+          },
+          {
+            "text": "Ambii useri specificati la a si b pot fi folositi deoarece sunt useri de sistem",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Accesul userilor comuni la o baza de date Oracle se poate face daca instanta este in starea:",
+        "answers": [
+          {
+            "text": "NOMOUNT",
+            "correct": false
+          },
+          {
+            "text": "OPEN",
+            "correct": true
+          },
+          {
+            "text": "MOUNT",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla proprietarul si data la care a fost creata o tabela in baza de date se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "DBA_OBJECTS",
+            "correct": true
+          },
+          {
+            "text": "USER_TABLES",
+            "correct": false
+          },
+          {
+            "text": "Informatia se poate obtine din ambele view-uri specificate la a si b",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Daca la instalarea Oracle database nu s-a creat nicio baza de date, se poate crea ulterior folosind:",
+        "answers": [
+          {
+            "text": "Comanda CREATE DATABASE la prima conexiune in SQL*Plus",
+            "correct": false
+          },
+          {
+            "text": "Utilitarul Database Configuration Assistant",
+            "correct": false
+          },
+          {
+            "text": "Ambele metode prezentate la a si b pot fi folosite",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla proprietarul si data la care a fost creat un obiect in baza de date se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "DBA_OBJECTS",
+            "correct": false
+          },
+          {
+            "text": "USER_OBJECTS",
+            "correct": false
+          },
+          {
+            "text": "Informatia se poate obtine din ambele view-uri specificate la a si b",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Numele view_urilor dinamice din dictionarul bazei de date Oracle pot fi vizualitate printr-o interogare pe:",
+        "answers": [
+          {
+            "text": "USER_VIEWS",
+            "correct": false
+          },
+          {
+            "text": "ALL_VIEWS",
+            "correct": false
+          },
+          {
+            "text": "V$FIXED_TABLE",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Procesul de background DBWR este folosit de o instanta Oracle pentru:",
+        "answers": [
+          {
+            "text": "Citirea si incarcarea in Database Buffer Cache a blocurilor de date din fisierele de date",
+            "correct": false
+          },
+          {
+            "text": "Scrierea blocurilor de date din Database Buffer Cache in fisierele de date",
+            "correct": false
+          },
+          {
+            "text": "Ambele variante prezentate la a si b sunt corecte",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "La startarea unei instante Oracle parametrii de initializare pot fi preluati din:",
+        "answers": [
+          {
+            "text": "Fisierele de date",
+            "correct": false
+          },
+          {
+            "text": "Fisierele de log",
+            "correct": false
+          },
+          {
+            "text": "Fisierul persistent SPFILE",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Numele si calea fisierelor de control folosite de o baza de date Oracle pot fi aflate folosind:",
+        "answers": [
+          {
+            "text": "Interogare pe V$PARAMETER/V$CONTROLFILE sau comanda SHOW PARAMETER",
+            "correct": true
+          },
+          {
+            "text": "Interogare pe V$PARAMETER",
+            "correct": false
+          },
+          {
+            "text": "Interogare pe V$CONTROLFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Multiplexarea fisierelor de control intr-o baza de date Oracle se face cu comanda:",
+        "answers": [
+          {
+            "text": "ALTER SYSTEM SET control_files =’$HOME/file1.ctl’,’$HOME/file2.ctl’ SCOPE=SPFILE",
+            "correct": true
+          },
+          {
+            "text": "ALTER VIEW v$controlfile SET control_files =’$HOME/file1.ctl’, ’$HOME/file2.ctl’",
+            "correct": false
+          },
+          {
+            "text": "ALTER DATABASE SET control_files =’$HOME/file1.ctl’, ’$HOME/file2.ctl’",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla care membri ai unui grup din fisierele de log dintr-o baza de date Oracle sunt inactivi, se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "V$LOG",
+            "correct": true
+          },
+          {
+            "text": "V$LOGFILE",
+            "correct": false
+          },
+          {
+            "text": "V$THREAD",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numele si calea fisierelor de log create intr-o baza de date Oracle pot fi aflate din urmatoarele view-uri:",
+        "answers": [
+          {
+            "text": "V$PARAMETER",
+            "correct": false
+          },
+          {
+            "text": "V$LOGFILE",
+            "correct": true
+          },
+          {
+            "text": "Ambele view-uri specificate la a si b contin aceasta informatie",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numele si calea fisierelor temporare folosite de o baza de date Oracle pot fi aflate folosind:",
+        "answers": [
+          {
+            "text": "Interogare pe V$TEMPFILE",
+            "correct": true
+          },
+          {
+            "text": "Interogare pe V$CONTROLFILE",
+            "correct": false
+          },
+          {
+            "text": "Interogare pe V$DATABASE sau V$TEMPFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fisierele de control care se creeaza intr-o baza de date Oracle pot fi specificate folosind comenzile:",
+        "answers": [
+          {
+            "text": "CREATE DATABASE",
+            "correct": false
+          },
+          {
+            "text": "ALTER SYSTEM",
+            "correct": false
+          },
+          {
+            "text": "Ambele comenzi specificate la a si b pot fi folosite, in functie de context",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Numele fisierelor de log folosite de o baza de date Oracle pot fi aflate din:",
+        "answers": [
+          {
+            "text": "V$LOGFILE",
+            "correct": true
+          },
+          {
+            "text": "V$DATABASE sau V$LOGFILE",
+            "correct": false
+          },
+          {
+            "text": "V$INSTANCE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla care este membrul curent al unui grup din fisierele de log dintr-o baza de date Oracle, se poate face o interogare pe:",
+        "answers": [
+          {
+            "text": "V$INSTANCE",
+            "correct": false
+          },
+          {
+            "text": "V$LOG",
+            "correct": false
+          },
+          {
+            "text": "V$LOGFILE",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Pentru a afla data dimensiunea in blocuri a fisierelor de control dintr-o baza de date Oracle poate fi folosit view-ul dinamic:",
+        "answers": [
+          {
+            "text": "V$CONTROLFILE",
+            "correct": false
+          },
+          {
+            "text": "V$CONTROLFILE_RECORD_SECTION",
+            "correct": true
+          },
+          {
+            "text": "V$PARAMETER",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numele fisierelor de control folosite de o baza de date Oracle pot fi aflate din:",
+        "answers": [
+          {
+            "text": "V$DATABASE si V$CONTROLFILE",
+            "correct": false
+          },
+          {
+            "text": "V$CONTROLFILE_RECORD_SECTION",
+            "correct": false
+          },
+          {
+            "text": "V$CONTROLFILE",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "In cursul nostru SCN inseamna:",
+        "answers": [
+          {
+            "text": "System Change Number",
+            "correct": true
+          },
+          {
+            "text": "System Core Number",
+            "correct": false
+          },
+          {
+            "text": "Serial Change Number",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un user poate avea in acelasi timp:",
+        "answers": [
+          {
+            "text": "O singura sesiune deschisa cu acelasi server Oracle",
+            "correct": false
+          },
+          {
+            "text": "Mai multe sesiuni deschise cu acelasi server Oracle",
+            "correct": true
+          },
+          {
+            "text": "Mai multe sesiuni deschise cu acelasi server Oracle doar in varianta Multithreaded Server",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Database Writer (DBWn) este un proces:",
+        "answers": [
+          {
+            "text": "slave",
+            "correct": false
+          },
+          {
+            "text": "de background",
+            "correct": true
+          },
+          {
+            "text": "server",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un user Oracle interactioneaza direct cu:",
+        "answers": [
+          {
+            "text": "Un proces user",
+            "correct": true
+          },
+          {
+            "text": "Serverul Oracle",
+            "correct": false
+          },
+          {
+            "text": "Un proces server",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numarul minim de fisiere de tip Fisier de Redo Log este:",
+        "answers": [
+          {
+            "text": "Doua",
+            "correct": true
+          },
+          {
+            "text": "Nu exista o valoare minima",
+            "correct": false
+          },
+          {
+            "text": "Unul",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Procesul Checkpoint (CKPT):",
+        "answers": [
+          {
+            "text": "Citeste blocurile de date de modificat in memorie",
+            "correct": false
+          },
+          {
+            "text": "Scrie periodic pe disc blocurile de date modificate",
+            "correct": true
+          },
+          {
+            "text": "Scrie periodic pe disc inregistrarile Redo Log modificate",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fisierele de date contin printre altele:",
+        "answers": [
+          {
+            "text": "Dictionarul de date si obiectele userului",
+            "correct": true
+          },
+          {
+            "text": "Obiectele userului si inregistrarile de tip Redo Log",
+            "correct": false
+          },
+          {
+            "text": "Inregistrarile de tip Redo Log si blocuri de tip Rollback",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Procesul System Monitor (SMON):",
+        "answers": [
+          {
+            "text": "Este folosit pentru recuperarea dupa incident",
+            "correct": true
+          },
+          {
+            "text": "Scrie periodic pe disc inregistrarile Redo Log modificate",
+            "correct": false
+          },
+          {
+            "text": "Scrie periodic pe disc blocurile de date modificate",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Cand o tranzactie este comisa (COMMIT) se scriu pe disc:",
+        "answers": [
+          {
+            "text": "Inregistrari din Instant Memory",
+            "correct": false
+          },
+          {
+            "text": "Blocurile de date modificate",
+            "correct": false
+          },
+          {
+            "text": "Inregistrari din Redo Log",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Procesul Archiver (ARCn):",
+        "answers": [
+          {
+            "text": "Scrie periodic pe disc blocurile de date modificate",
+            "correct": false
+          },
+          {
+            "text": "Copiaza fisierele Redo Log in arhiva de pe disc",
+            "correct": true
+          },
+          {
+            "text": "Citeste blocurile de date de modificat in memorie",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul lansarii unei operatii de oprire a bazei de date, sunt permise noi conexiuni in cazul opririi:",
+        "answers": [
+          {
+            "text": "Tranzactionale",
+            "correct": false
+          },
+          {
+            "text": "Nu se mai permit noi conexiuni",
+            "correct": true
+          },
+          {
+            "text": "Normale",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care este afirmatia corecta:",
+        "answers": [
+          {
+            "text": "DBA=rol, SYSDBA=privilegiu",
+            "correct": true
+          },
+          {
+            "text": "DBA=privilegiu, SYSDBA=rol",
+            "correct": false
+          },
+          {
+            "text": "Ambele sunt privilegii",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Vederile dinamice pentru performante se pot consulta:",
+        "answers": [
+          {
+            "text": "Unele dintre ele dupa pornirea instantei",
+            "correct": true
+          },
+          {
+            "text": "Doar dupa deschiderea BD",
+            "correct": false
+          },
+          {
+            "text": "Doar dupa montarea BD",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Crearea unei baze de date se face:",
+        "answers": [
+          {
+            "text": "Cu instanta pornita",
+            "correct": true
+          },
+          {
+            "text": "Cu procesele de background oprite",
+            "correct": false
+          },
+          {
+            "text": "Cu baza de date montata",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Montarea bazei de date se face:",
+        "answers": [
+          {
+            "text": "La montare se face implicit si pornirea instantei",
+            "correct": false
+          },
+          {
+            "text": "Inainte de pornirea instantei",
+            "correct": false
+          },
+          {
+            "text": "Dupa pornirea instantei",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Fortarea unui log switch se face cu comanda:",
+        "answers": [
+          {
+            "text": "ALTER SESSION SWITCH LOGFILE",
+            "correct": false
+          },
+          {
+            "text": "ALTER DATABASE SWITCH LOGFILE",
+            "correct": false
+          },
+          {
+            "text": "ALTER SYSTEM SWITCH LOGFILE",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Lista cu fisierele de redo log se poate obtine cu comanda:",
+        "answers": [
+          {
+            "text": "SELECT VALUE FROM V$PARAMETER WHERE NAME = 'control_files';",
+            "correct": false
+          },
+          {
+            "text": "SELECT MEMBER FROM V$LOGFILE;",
+            "correct": true
+          },
+          {
+            "text": "SELECT NAME FROM V$DATAFILE;",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dimensiunea membrilor unui grup de fisiere redo log:",
+        "answers": [
+          {
+            "text": "Trebuie sa fie aceeasi",
+            "correct": true
+          },
+          {
+            "text": "Poate fi diferita",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Parametrul LOG_CHECKPOINT_INTERVAL se masoara in:",
+        "answers": [
+          {
+            "text": "Minute",
+            "correct": false
+          },
+          {
+            "text": "Blocuri",
+            "correct": true
+          },
+          {
+            "text": "Secunde",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Membrii unui grup de fisiere redo log sunt scrisi:",
+        "answers": [
+          {
+            "text": "In paralel (multiplexat)",
+            "correct": true
+          },
+          {
+            "text": "In serie (unul dupa altul)",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dictionarul de date al sistemului se memoreaza in :",
+        "answers": [
+          {
+            "text": "Tablespace-ul SYSTEM",
+            "correct": true
+          },
+          {
+            "text": "Intr-un tablespace specificat la instalare",
+            "correct": false
+          },
+          {
+            "text": "Tablespace-ul DBA",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Segmentele temporare se pot stoca :",
+        "answers": [
+          {
+            "text": "Doar in tablespace-uri temporare",
+            "correct": false
+          },
+          {
+            "text": "In orice tablespace",
+            "correct": true
+          },
+          {
+            "text": "In orice tablespace cu exceptia celui SYSTEM",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "O baza de date contine un numar de tablespace:",
+        "answers": [
+          {
+            "text": "<=1",
+            "correct": false
+          },
+          {
+            "text": ">=1",
+            "correct": true
+          },
+          {
+            "text": "=1",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care afirmatie este corecta:",
+        "answers": [
+          {
+            "text": "Exista un segment numit SYSTEM",
+            "correct": false
+          },
+          {
+            "text": "Exista un tablespace numit SYSTEM",
+            "correct": true
+          },
+          {
+            "text": "Exista o extensie numita SYSTEM",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace poate deveni OFFLINE:",
+        "answers": [
+          {
+            "text": "Doar dupa ce a fost creat ONLINE",
+            "correct": false
+          },
+          {
+            "text": "Doar la creare",
+            "correct": false
+          },
+          {
+            "text": "Atat la creare cat si dupa aceea",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Daca INITIAL este 10M, NEXT este 20M, PCTINCREASE este 50 atunci extensia 3 va avea:",
+        "answers": [
+          {
+            "text": "45M",
+            "correct": false
+          },
+          {
+            "text": "15M",
+            "correct": false
+          },
+          {
+            "text": "30M",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Procesul prin care o linie este sparta in mai multe bucati care sunt stocate in mai multe blocuri, se numeste:",
+        "answers": [
+          {
+            "text": "Inlantuirea liniilor (row chaining)",
+            "correct": true
+          },
+          {
+            "text": "Indexarea pointerilor",
+            "correct": false
+          },
+          {
+            "text": "Migrarea liniilor",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul cererii CREATE TABLE, valoarea lui PCTFREE poate fi:",
+        "answers": [
+          {
+            "text": "Intre 1 si 39",
+            "correct": false
+          },
+          {
+            "text": "Intre 1 si 9",
+            "correct": false
+          },
+          {
+            "text": "Intre 1 si 99",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Daca o tabela a fost create cu optiunea NOPARALLEL atunci:",
+        "answers": [
+          {
+            "text": "Tabela nu poate fi parcursa in paralel",
+            "correct": false
+          },
+          {
+            "text": "Tabela poate fi parcursa in paralel folosind comentarii de tip 'hint'",
+            "correct": true
+          },
+          {
+            "text": "Tabela poate fi parcursa in paralel folosind clauza PARALLEL a unei cereri SELECT",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul tabeleor organizate ca index (index organized):",
+        "answers": [
+          {
+            "text": "Liniile sunt impartite in mai multe grupuri",
+            "correct": false
+          },
+          {
+            "text": "Acestea sunt parte a unui cluster",
+            "correct": false
+          },
+          {
+            "text": "Inregistrarile sunt organizate ca arbore B",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Într-un spațiu 1D avem 2 puncte roșii (1 și 3) și 2 puncte albastre (10 și 11). Folosind kNN pentru k = 3, punctul 5 este albastru?",
+        "answers": [
+          {
+            "text": "Nu",
+            "correct": true
+          },
+          {
+            "text": "Da",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Luați în considerare o școală cu 50% băieți și 50% fete. Fetele poartă pantaloni scurți sau fuste în proporții egale, iar băieții doar pantaloni scurți. Un observator vede de la mare distanță o persoană purtând pantaloni scurți. Care este probabilitatea ca persoana respectivă să fie fată?",
+        "answers": [
+          {
+            "text": "aprox. 43%",
+            "correct": true
+          },
+          {
+            "text": "aprox. 53%",
+            "correct": false
+          },
+          {
+            "text": "aprox. 33%",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Entropie (D) = -Suma j [Pr (cj) * log2 Pr (cj)]. Dacă D conține 100% exemple negative, entropia lui D este:",
+        "answers": [
+          {
+            "text": "1",
+            "correct": false
+          },
+          {
+            "text": "-1",
+            "correct": false
+          },
+          {
+            "text": "0",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "KNN:",
+        "answers": [
+          {
+            "text": "Produce un clasificator folosit apoi în clasificare",
+            "correct": false
+          },
+          {
+            "text": "Este doar o metodă de clasificare care nu produce un clasificator",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un arbore de decizie poate fi convertit în:",
+        "answers": [
+          {
+            "text": "Un set de reguli",
+            "correct": true
+          },
+          {
+            "text": "Celelalte doua raspunsuri sunt incorecte",
+            "correct": false
+          },
+          {
+            "text": "O singură regulă complexă",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In 1D, functia D(x, a) = x+sqr( y ) poate fi folosita ca functie de distanta?",
+        "answers": [
+          {
+            "text": "Nu",
+            "correct": true
+          },
+          {
+            "text": "Da",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fie punctele {1, 2, 3, 4, 5, 6}. Daca aplicam K-Means pentru K = 3 si centroizi initiali 1, 2 si 3 obtinem clusterele:",
+        "answers": [
+          {
+            "text": "(1, 2), (3, 4), (5, 6)",
+            "correct": false
+          },
+          {
+            "text": "(1), (2, 3), (4, 5, 6)",
+            "correct": false
+          },
+          {
+            "text": "(1), (2, 3, 4), (5, 6)",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "In 1D, functia D(x, y) = sqr( x )+sqr( y ) poate fi folosita ca functie de distanta?",
+        "answers": [
+          {
+            "text": "Nu",
+            "correct": true
+          },
+          {
+            "text": "Da",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fie punctele {1, 2, 5, 6} in 1D. Daca aplicam K-Means pentru K = 2 si centroizi initiali 1 si 2 obtinem clusterele:",
+        "answers": [
+          {
+            "text": "(1) and (2, 5, 6)",
+            "correct": false
+          },
+          {
+            "text": "(1, 2) and (5, 6)",
+            "correct": true
+          },
+          {
+            "text": "(1, 5) and (2, 6)",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fie in plan punctele A, B and C si distanta dintre ele d(A, B) = 3, d(A, C) = 5, d(B, C) = 4 (numere pitagoreice). Folosind FastMap, coordonata lui A pe axa BC (origine in B) este:",
+        "answers": [
+          {
+            "text": "0",
+            "correct": true
+          },
+          {
+            "text": "4",
+            "correct": false
+          },
+          {
+            "text": "3",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cadrul cursului nostru DICE e abrevierea pentru:",
+        "answers": [
+          {
+            "text": "DARPA Initiative in Concurrent Engineering",
+            "correct": false
+          },
+          {
+            "text": "Dynamic Itemset Counting Engine",
+            "correct": true
+          },
+          {
+            "text": "Distributed Informatics Computing Environment",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Determinarea valorilor de index si autoritate pentru pagini se face:",
+        "answers": [
+          {
+            "text": "Se pot determina separat",
+            "correct": true
+          },
+          {
+            "text": "Metoda prezentata nu specifica",
+            "correct": false
+          },
+          {
+            "text": "Doar impreuna",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul calculului rangului paginii, Dead End semnifica:",
+        "answers": [
+          {
+            "text": "O pagină care nu are succesori",
+            "correct": true
+          },
+          {
+            "text": "O situatie de tip Deadlock din baze de date",
+            "correct": false
+          },
+          {
+            "text": "Un grup de una sau mai multe pagini care nu au legături către pagini din afara grupului",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "La determinarea rangului unei pagini (fara taxare) daca in final se ajunge la [0,0, …]",
+        "answers": [
+          {
+            "text": "Exista pagini fara predecesori",
+            "correct": false
+          },
+          {
+            "text": "Exista pagini autoreferite",
+            "correct": false
+          },
+          {
+            "text": "Exista pagini fara succesori",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "In matricea stochastica pentru determinarea rangului paginii numarul de succesori ai unei pagini e dat de:",
+        "answers": [
+          {
+            "text": "Numarul de valori non zero de pe coloana corespunzatoare paginii",
+            "correct": true
+          },
+          {
+            "text": "Numarul de valori non zero de pe linia corespunzatoare paginii",
+            "correct": false
+          },
+          {
+            "text": "Numarul de valori non zero de pe diagonala corespunzatoare paginii",
+            "correct": false
+          }
+        ]
+      }
+    ];
+
+    let B = [
+      {
+        "question": "Un user poate avea in acelasi timp:",
+        "answers": [
+          {
+            "text": "Mai multe sesiuni deschisa cu acelasi server Oracle",
+            "correct": true
+          },
+          {
+            "text": "O singura sesiune deschisa cu acelasi server Oracle",
+            "correct": false
+          },
+          {
+            "text": "Mai multe sesiuni deschisa cu acelasi server Oracle doar in varianta Multithreaded Server",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numarul minim de fisiere de tip Fisier de Redo Log este:",
+        "answers": [
+          {
+            "text": "Nu exista o valoare minima",
+            "correct": false
+          },
+          {
+            "text": "Unul",
+            "correct": false
+          },
+          {
+            "text": "Doua",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "In cursul nostru SCN inseamna:",
+        "answers": [
+          {
+            "text": "Serial Change Number",
+            "correct": false
+          },
+          {
+            "text": "System Change Number",
+            "correct": true
+          },
+          {
+            "text": "System Core Number",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Log Writer (LGWR) este un proces:",
+        "answers": [
+          {
+            "text": "slave",
+            "correct": false
+          },
+          {
+            "text": "server",
+            "correct": false
+          },
+          {
+            "text": "de background",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un server Oracle este compus din:",
+        "answers": [
+          {
+            "text": "O zona de memorie numita PGA si procese server",
+            "correct": false
+          },
+          {
+            "text": "O instanta Oracle si o baza de date",
+            "correct": true
+          },
+          {
+            "text": "O zona de memorie numita SGA si procese de background",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dimensiunea zonei de memorie Redo Log Buffer e data de:",
+        "answers": [
+          {
+            "text": "DB_BLOCK_BUFFERS",
+            "correct": false
+          },
+          {
+            "text": "DB_BLOCK_SIZE",
+            "correct": false
+          },
+          {
+            "text": "LOG_BUFFER",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Numarul minim de fisiere de tip Fisier de Control este:",
+        "answers": [
+          {
+            "text": "Unul",
+            "correct": true
+          },
+          {
+            "text": "Doua",
+            "correct": false
+          },
+          {
+            "text": "Nu exista o valoare minima",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numarul de blocuri de date din Database Buffer Cache este dat de:",
+        "answers": [
+          {
+            "text": "DB_BLOCK_SIZE",
+            "correct": false
+          },
+          {
+            "text": "LOG_BUFFER",
+            "correct": false
+          },
+          {
+            "text": "DB_BLOCK_BUFFERS",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Procesul Checkpoint (CKPT):",
+        "answers": [
+          {
+            "text": "Scrie periodic pe disc blocurile de date modificate",
+            "correct": true
+          },
+          {
+            "text": "Scrie periodic pe disc inregistrarile Redo Log modificate",
+            "correct": false
+          },
+          {
+            "text": "Citeste blocurile de date de modificat in memorie",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Numarul minim de fisiere de tip Fisier de Date este:",
+        "answers": [
+          {
+            "text": "Unul",
+            "correct": true
+          },
+          {
+            "text": "Doua",
+            "correct": false
+          },
+          {
+            "text": "Nu exista o valoare minima",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fisierele de date contin printre altele:",
+        "answers": [
+          {
+            "text": "Obiectele userului si inregistrarile de tip Redo Log",
+            "correct": false
+          },
+          {
+            "text": "Dictionarul de date si obiectele userului",
+            "correct": true
+          },
+          {
+            "text": "Inregistrarile de tip Redo Log si blocuri de tip Rollback",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dimensiunea blocului de date din Database Buffer Cache este dat de:",
+        "answers": [
+          {
+            "text": "DB_BLOCK_SIZE",
+            "correct": true
+          },
+          {
+            "text": "DB_BLOCK_BUFFERS",
+            "correct": false
+          },
+          {
+            "text": "LOG_BUFFER",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Procesul System Monitor (SMON):",
+        "answers": [
+          {
+            "text": "Scrie periodic pe disc inregistrarile Redo Log modificate",
+            "correct": false
+          },
+          {
+            "text": "Este folosit pentru recuperarea dupa incident",
+            "correct": true
+          },
+          {
+            "text": "Scrie periodic pe disc blocurile de date modificate",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un proces server lucreaza impreuna cu:",
+        "answers": [
+          {
+            "text": "Doar cu procesul user",
+            "correct": false
+          },
+          {
+            "text": "Si cu procesul user si cu serverul Oracle",
+            "correct": true
+          },
+          {
+            "text": "Doar cu serverul Oracle",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Database Writer (DBWn) este un proces:",
+        "answers": [
+          {
+            "text": "server",
+            "correct": false
+          },
+          {
+            "text": "slave",
+            "correct": false
+          },
+          {
+            "text": "de background",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "La inchiderea bazei de date blocurile de date modificate din memorie sunt scrise pe disc de:",
+        "answers": [
+          {
+            "text": "Procesul Database Writer (DBWn)",
+            "correct": true
+          },
+          {
+            "text": "Procesul Checkpoint (CKPT)",
+            "correct": false
+          },
+          {
+            "text": "Procesul Checkpoint (CKPT)",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Cand o tranzactie este comisa (COMMIT) se scriu pe disc:",
+        "answers": [
+          {
+            "text": "Blocurile de date modificate",
+            "correct": false
+          },
+          {
+            "text": "Inregistrari din Redo Log",
+            "correct": true
+          },
+          {
+            "text": "Inregistrari din Instant Memory",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un user Oracle interactioneaza direct cu:",
+        "answers": [
+          {
+            "text": "Serverul Oracle",
+            "correct": false
+          },
+          {
+            "text": "Un proces server",
+            "correct": false
+          },
+          {
+            "text": "Un proces user",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Procesul Archiver (ARCn):",
+        "answers": [
+          {
+            "text": "Citeste blocurile de date de modificat in memorie",
+            "correct": false
+          },
+          {
+            "text": "Scrie periodic pe disc blocurile de date modificate",
+            "correct": false
+          },
+          {
+            "text": "Copiaza fisierele Redo Log in arhiva de pe disc",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un proces server are la dispozitie o zona de memorie exclusiva numita:",
+        "answers": [
+          {
+            "text": "SGA",
+            "correct": false
+          },
+          {
+            "text": "Shared Pool",
+            "correct": false
+          },
+          {
+            "text": "PGA",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "O instanta Oracle este compusa din:",
+        "answers": [
+          {
+            "text": "O zona de memorie numita SGA si procese slave",
+            "correct": false
+          },
+          {
+            "text": "O zona de memorie numita SGA si procese de background",
+            "correct": true
+          },
+          {
+            "text": "O zona de memorie numita PGA si procese server",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul carei opriri nu se executa ROLLBACK pentru tranzactiile active:",
+        "answers": [
+          {
+            "text": "ROLLBACK se executa pentru toate tipurile de opriri",
+            "correct": false
+          },
+          {
+            "text": "Imediat si Abort",
+            "correct": false
+          },
+          {
+            "text": "Abort",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Exista vederi dinamice care pot fi consultate cu instanta oprita?",
+        "answers": [
+          {
+            "text": "Nu",
+            "correct": true
+          },
+          {
+            "text": "Da",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Recuperarea dupa incident este necesara cand oprirea s-a facut in modul:",
+        "answers": [
+          {
+            "text": "Abort",
+            "correct": true
+          },
+          {
+            "text": "Imediat si Abort",
+            "correct": false
+          },
+          {
+            "text": "Tranzactional, Imediat si Abort",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Userul SYSEM este:",
+        "answers": [
+          {
+            "text": "SYSTEM este un privilegiu si nu un user",
+            "correct": false
+          },
+          {
+            "text": "Proprietarul tabelelor din dictionarul bazei de date",
+            "correct": false
+          },
+          {
+            "text": "Proprietarul altor tabele decat cele din dictionarul de date",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "In cazul lansarii unei operatii de oprire a bazei de date, sunt permise noi conexiuni in cazul opririi:",
+        "answers": [
+          {
+            "text": "Nu se mai permit noi conexiuni",
+            "correct": true
+          },
+          {
+            "text": "Normale",
+            "correct": false
+          },
+          {
+            "text": "Tranzactionale",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Crearea unei baze de date se face:",
+        "answers": [
+          {
+            "text": "Cu instanta pornita",
+            "correct": true
+          },
+          {
+            "text": "Cu baza de date montata",
+            "correct": false
+          },
+          {
+            "text": "Cu procesele de background oprite",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Vederile dinamice pentru performante se pot consulta:",
+        "answers": [
+          {
+            "text": "Doar dupa deschiderea BD",
+            "correct": false
+          },
+          {
+            "text": "Unele dintre elel dupa pornirea instantei",
+            "correct": true
+          },
+          {
+            "text": "Doar dupa montarea BD",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Putem vedea daca o modul curent de lucru este RESTRICTED consultand:",
+        "answers": [
+          {
+            "text": "V$CONTROLFILE",
+            "correct": false
+          },
+          {
+            "text": "V$INSTANCE",
+            "correct": true
+          },
+          {
+            "text": "V$SESSION",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Poti crea o baza de date daca esti :",
+        "answers": [
+          {
+            "text": "SYSDBA sau SYSOPER",
+            "correct": false
+          },
+          {
+            "text": "DBA",
+            "correct": false
+          },
+          {
+            "text": "SYSDBA",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "La executia comenzii ALTER SYSTEM ENABLE RESTRICTED SESSION sesiunile deja existente:",
+        "answers": [
+          {
+            "text": "Raman active pana la terminarea lor",
+            "correct": true
+          },
+          {
+            "text": "Sunt oprite",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care este afirmatia corecta :",
+        "answers": [
+          {
+            "text": "DBA=rol, SYSDBA=privilegiu",
+            "correct": true
+          },
+          {
+            "text": "DBA=privilegiu, SYSDBA=rol",
+            "correct": false
+          },
+          {
+            "text": "Ambele sunt privilegii",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Deschiderea fisierelor de date se face la momentul :",
+        "answers": [
+          {
+            "text": "Deschiderii BD",
+            "correct": true
+          },
+          {
+            "text": "Montarii BD",
+            "correct": false
+          },
+          {
+            "text": "Pornirii instantei",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care operatie nu poate fi efectuata cu SYSOPER doar:",
+        "answers": [
+          {
+            "text": "CREATE SPFILE",
+            "correct": false
+          },
+          {
+            "text": "CREATE DATABASE",
+            "correct": true
+          },
+          {
+            "text": "ALTER DATABASE ARCHIVELOG",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Montarea bazei de date se face:",
+        "answers": [
+          {
+            "text": "Dupa pornirea instantei",
+            "correct": true
+          },
+          {
+            "text": "La montare se face implicit si pornirea instantei",
+            "correct": false
+          },
+          {
+            "text": "Inainte de pornirea instantei",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul carei opriri nu sunt inchise fisierele:",
+        "answers": [
+          {
+            "text": "Tranzactional, Imediat si Abort",
+            "correct": false
+          },
+          {
+            "text": "Abort",
+            "correct": true
+          },
+          {
+            "text": "Imediat si Abort",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Userul SYS este:",
+        "answers": [
+          {
+            "text": "SYS este un rol si nu un user",
+            "correct": false
+          },
+          {
+            "text": "Proprietarul altor tabele decat cele din dictionarul de date",
+            "correct": false
+          },
+          {
+            "text": "Proprietarul tabelelor din dictionarul bazei de date",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "DBA contine:",
+        "answers": [
+          {
+            "text": "SYSDBA dar nu SYSOPER",
+            "correct": false
+          },
+          {
+            "text": "SYSDBA si SYSOPER",
+            "correct": true
+          },
+          {
+            "text": "SYSOPER dar nu SYSDBA",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Redenumirea fisierelor de date in care se stocheaza baza de date se poate face:",
+        "answers": [
+          {
+            "text": "Cu instanta pornita",
+            "correct": false
+          },
+          {
+            "text": "Cu baza de date montata",
+            "correct": true
+          },
+          {
+            "text": "Cu baza de date deschisa",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Rolul Oracle DBA nu contine:",
+        "answers": [
+          {
+            "text": "SYSOPER, dar contine SYSDBA",
+            "correct": false
+          },
+          {
+            "text": "Nici SYSDBA si nici SYSOPER",
+            "correct": true
+          },
+          {
+            "text": "SYSDBA, dar contine SYSOPER",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul carei opriri se executa ROLLBACK pentru tranzactiile active:",
+        "answers": [
+          {
+            "text": "Abort",
+            "correct": false
+          },
+          {
+            "text": "ROLLBACK se executa pentru toate tipurile de opriri",
+            "correct": true
+          },
+          {
+            "text": "Imediat si Abort",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Redenumirea unui fisier de Redo Log presupune si executia cererii:",
+        "answers": [
+          {
+            "text": "ALTER DATABASE RENAME FILE",
+            "correct": true
+          },
+          {
+            "text": "ALTER SYSTEM RENAME REDOLOG FILE",
+            "correct": false
+          },
+          {
+            "text": "ALTER DATABASE RENAME REDOLOG FILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fortarea unui log switch se face cu comanda:",
+        "answers": [
+          {
+            "text": "ALTER SYSTEM SWITCH LOGFILE",
+            "correct": true
+          },
+          {
+            "text": "ALTER DATABASE SWITCH LOGFILE",
+            "correct": false
+          },
+          {
+            "text": "ALTER SESSION SWITCH LOGFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Adaugarea de noi membri intr-un grup de Redo Log se face cu comanda:",
+        "answers": [
+          {
+            "text": "ALTER SESSION ADD LOGFILE MEMBER",
+            "correct": false
+          },
+          {
+            "text": "ALTER DATABASE ADD LOGFILE MEMBER",
+            "correct": true
+          },
+          {
+            "text": "ALTER SYSTEM ADD LOGFILE MEMBER",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Parametrul LOG_CHECKPOINT_TIMEOUT se masoara in :",
+        "answers": [
+          {
+            "text": "Minute",
+            "correct": false
+          },
+          {
+            "text": "Secunde",
+            "correct": true
+          },
+          {
+            "text": "Blocuri",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Lista cu fisierele de date se poate obtine cu comanda:",
+        "answers": [
+          {
+            "text": "SELECT MEMBER FROM V$LOGFILE;",
+            "correct": false
+          },
+          {
+            "text": "SELECT VALUE FROM V$PARAMETER WHERE NAME = 'control_files';",
+            "correct": false
+          },
+          {
+            "text": "SELECT NAME FROM V$DATAFILE;",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Fisierele de control sunt de tipul :",
+        "answers": [
+          {
+            "text": "Binar",
+            "correct": true
+          },
+          {
+            "text": "Text",
+            "correct": false
+          },
+          {
+            "text": "XML",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dimensiunea membrilor unui grup de fisiere redo log:",
+        "answers": [
+          {
+            "text": "Poate fi diferita",
+            "correct": false
+          },
+          {
+            "text": "Trebuie sa fie aceeasi",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Crearea unei salvari pentru fisierele de control se face cu comanda:",
+        "answers": [
+          {
+            "text": "ALTER SYSTEM BACKUP CONTROLFILE",
+            "correct": false
+          },
+          {
+            "text": "ALTER DATABASE BACKUP CONTROLFILE",
+            "correct": true
+          },
+          {
+            "text": "ALTER SESSION BACKUP CONTROLFILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Parametrul LOG_CHECKPOINT_INTERVAL se masoara in :",
+        "answers": [
+          {
+            "text": "Secunde",
+            "correct": false
+          },
+          {
+            "text": "Minute",
+            "correct": false
+          },
+          {
+            "text": "Blocuri",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Stergerea unui fisier de control se face :",
+        "answers": [
+          {
+            "text": "Cu baza de date deschisa",
+            "correct": false
+          },
+          {
+            "text": "Cu baza de date doar montata",
+            "correct": false
+          },
+          {
+            "text": "Cu instanta oprita.",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Fortarea unui checkpoint se face cu comanda:",
+        "answers": [
+          {
+            "text": "ALTER SYSTEM CHECKPOINT",
+            "correct": true
+          },
+          {
+            "text": "ALTER SESSION CHECKPOINT",
+            "correct": false
+          },
+          {
+            "text": "ALTER DATABASE CHECKPOINT",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fisierele de control sunt scrise :",
+        "answers": [
+          {
+            "text": "In paralel (multiplexat)",
+            "correct": true
+          },
+          {
+            "text": "In serie (unul dupa altul)",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Lista cu fisierele de control se poate obtine cu comanda:",
+        "answers": [
+          {
+            "text": "SELECT NAME FROM V$DATAFILE;",
+            "correct": false
+          },
+          {
+            "text": "SELECT MEMBER FROM V$LOGFILE;",
+            "correct": false
+          },
+          {
+            "text": "SELECT VALUE FROM V$PARAMETER WHERE NAME = ‘control_files’; ",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Procesul Log Writer scrie pe disc:",
+        "answers": [
+          {
+            "text": "Dupa ce DBWRITER scrie pe disc",
+            "correct": false
+          },
+          {
+            "text": "Inainte ca DBWRITER sa scrie pe disc",
+            "correct": true
+          },
+          {
+            "text": "In acelasi timp cu DBWRITER",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Lista cu fisierele de redo log se poate obtine cu comanda:",
+        "answers": [
+          {
+            "text": "SELECT NAME FROM V$DATAFILE;",
+            "correct": false
+          },
+          {
+            "text": "SELECT MEMBER FROM V$LOGFILE;",
+            "correct": true
+          },
+          {
+            "text": "SELECT VALUE FROM V$PARAMETER WHERE NAME = ‘control_files’; ",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Membrii unui grup de fisiere redo log sunt scrisi:",
+        "answers": [
+          {
+            "text": "In paralel (multiplexat)",
+            "correct": true
+          },
+          {
+            "text": "In serie (unul dupa altul)",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care afirmatie este corecta :",
+        "answers": [
+          {
+            "text": "Cand apare un log-switch se face si un checkpoint",
+            "correct": true
+          },
+          {
+            "text": "Checkpoint si log-switch nu sunt corelate",
+            "correct": false
+          },
+          {
+            "text": "Cand apare un checkpoint se face si un log-switch",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Redenumirea unui fisier de Redo Log presupune si executia cererii:",
+        "answers": [
+          {
+            "text": "ALTER DATABASE RENAME FILE",
+            "correct": true
+          },
+          {
+            "text": "ALTER SYSTEM RENAME REDOLOG FILE",
+            "correct": false
+          },
+          {
+            "text": "ALTER DATABASE RENAME REDOLOG FILE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fisierele de redo-log sunt scrise de:",
+        "answers": [
+          {
+            "text": "Procesul server",
+            "correct": false
+          },
+          {
+            "text": "Procesul client",
+            "correct": false
+          },
+          {
+            "text": "Un proces de background",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Care element este o succesiune contigua de blocuri?",
+        "answers": [
+          {
+            "text": "Segment",
+            "correct": false
+          },
+          {
+            "text": "Extensie",
+            "correct": true
+          },
+          {
+            "text": "Tablespace",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un fisier de date poate sa apartina",
+        "answers": [
+          {
+            "text": "Unui singur tablespace",
+            "correct": true
+          },
+          {
+            "text": "La doua tablespace-uri diferite",
+            "correct": false
+          },
+          {
+            "text": "Unui singur segment",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace poate deveni OFFLINE:",
+        "answers": [
+          {
+            "text": "Atat la creare cat si dupa aceea",
+            "correct": true
+          },
+          {
+            "text": "Doar la creare",
+            "correct": false
+          },
+          {
+            "text": "Doar dupa ce a fost creat ONLINE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "DMT inseamna:",
+        "answers": [
+          {
+            "text": "Dictionary merged tablespace",
+            "correct": false
+          },
+          {
+            "text": "Data managed tablespace",
+            "correct": false
+          },
+          {
+            "text": "Dictionary managed tablespace",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Clauza AUTOEXTEND permite cresterea dimensiunii :",
+        "answers": [
+          {
+            "text": "Extensiilor",
+            "correct": false
+          },
+          {
+            "text": "Fisierelor de date",
+            "correct": true
+          },
+          {
+            "text": "Segmentelor",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Clauza DEFAULT STORAGE are efect in dimensionarea:",
+        "answers": [
+          {
+            "text": "Extensiilor",
+            "correct": true
+          },
+          {
+            "text": "Tablespace-urilor",
+            "correct": false
+          },
+          {
+            "text": "Segmentelor",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un nou fisier de date se poate adauga folosind comanda:",
+        "answers": [
+          {
+            "text": "ALTER TABLESPACE ...",
+            "correct": true
+          },
+          {
+            "text": "ALTER SEGMENT ...",
+            "correct": false
+          },
+          {
+            "text": "ALTER EXTENT …",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "La trecerea unui tablespace OFFLINE se pot folosi parametrii:",
+        "answers": [
+          {
+            "text": "NORMAL si IMMEDIATE",
+            "correct": true
+          },
+          {
+            "text": "TEMPORARY si UNIFORM",
+            "correct": false
+          },
+          {
+            "text": "NORMAL si FLASHBACK",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Segmentele temporare se pot stoca :",
+        "answers": [
+          {
+            "text": "Doar in tablespace-uri temporare",
+            "correct": false
+          },
+          {
+            "text": "In orice tablespace",
+            "correct": true
+          },
+          {
+            "text": "In orice tablespace cu exceptia celui SYSTEM",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "O baza de date contine un numar de tablespace:",
+        "answers": [
+          {
+            "text": "=1",
+            "correct": false
+          },
+          {
+            "text": "<=1",
+            "correct": false
+          },
+          {
+            "text": ">=1",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace poae fi de unul din tipurile:",
+        "answers": [
+          {
+            "text": "Permanent, Temporar, Offline",
+            "correct": false
+          },
+          {
+            "text": "Permanent, Temporar, Undo",
+            "correct": true
+          },
+          {
+            "text": "Permanent, Online, Offline",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In functie de gestiunea extensiilor, un tablespace poate fi de tipul:",
+        "answers": [
+          {
+            "text": "DMT sau FMT",
+            "correct": false
+          },
+          {
+            "text": "LMT sau SMT",
+            "correct": false
+          },
+          {
+            "text": "LMT sau DMT",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Care afirmatie este corecta:",
+        "answers": [
+          {
+            "text": "Exista un segment numit SYSAUX",
+            "correct": false
+          },
+          {
+            "text": "Exista o extensie numita SYSAUX",
+            "correct": false
+          },
+          {
+            "text": "Exista un tablespace numit SYSAUX",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace poate deveni READ ONLY:",
+        "answers": [
+          {
+            "text": "Doar dupa ce a fost creat READ-WRITE",
+            "correct": true
+          },
+          {
+            "text": "Atat la creare cat si dupa aceea",
+            "correct": false
+          },
+          {
+            "text": "Doar la creare",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dictionarul de date al sistemului se memoreaza in:",
+        "answers": [
+          {
+            "text": "Intr-un tablespace specificat la instalare",
+            "correct": false
+          },
+          {
+            "text": "Tablespace-ul DBA",
+            "correct": false
+          },
+          {
+            "text": "Tablespace-ul SYSTEM",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "LMT inseamna:",
+        "answers": [
+          {
+            "text": "Locally Managed tablespace",
+            "correct": true
+          },
+          {
+            "text": "Link managed tablespace",
+            "correct": false
+          },
+          {
+            "text": "Lower management for tablespaces",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un obiect (tabela, index, etc) are ca si corespondent:",
+        "answers": [
+          {
+            "text": "Un tablespace",
+            "correct": false
+          },
+          {
+            "text": "Un segment",
+            "correct": true
+          },
+          {
+            "text": "O extensie",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care afirmatie este corecta:",
+        "answers": [
+          {
+            "text": "Exista un tablespace numit SYSTEM",
+            "correct": true
+          },
+          {
+            "text": "Exista o extensie numita SYSTEM",
+            "correct": false
+          },
+          {
+            "text": "Exista un segment numit SYSTEM",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace poate fi de unul din tipurile:",
+        "answers": [
+          {
+            "text": "Permanent, Temporar, Offline",
+            "correct": false
+          },
+          {
+            "text": "Permanent, Temporar, Undo",
+            "correct": true
+          },
+          {
+            "text": "Permanent, Online, Offline",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dictionarul de date al sistemului se memoreaza in :",
+        "answers": [
+          {
+            "text": "Intr-un tablespace specificat la instalare",
+            "correct": false
+          },
+          {
+            "text": "Tablespace-ul SYSTEM",
+            "correct": true
+          },
+          {
+            "text": "Tablespace-ul DBA",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care afirmatie este adevarata:",
+        "answers": [
+          {
+            "text": "Clauza NOLOGGING din CREATE TABLE are prioritate fata de un FORCE LOGGING al tablespace-ului in care se pune tabela.",
+            "correct": false
+          },
+          {
+            "text": "Clauza FORCE LOGGING din CREATE TABLESPACE are prioritate fata de un NOLOGGING de la crearea unei tabele in acel tablespace.",
+            "correct": true
+          },
+          {
+            "text": "Daca exista o diferenta LOGGING – NOLOGGING intre tabela si tablespace automat se considera LOGGING",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "HWM poate fi mutat in jos:",
+        "answers": [
+          {
+            "text": "Celelalte doua raspunsuri sunt incorecte",
+            "correct": false
+          },
+          {
+            "text": "Ca efect al unor comenzi DML",
+            "correct": false
+          },
+          {
+            "text": "Ca efect al unor comenzi DDL",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Daca o tabela a fost create cu optiunea NOPARALLEL atunci:",
+        "answers": [
+          {
+            "text": "Tabela poate fi parcursa in paralel folosind comentarii de tip 'hint'",
+            "correct": false
+          },
+          {
+            "text": "Tabela nu poate fi parcursa in paralel",
+            "correct": true
+          },
+          {
+            "text": "Tabela poate fi parcursa in paralel folosind clauza PARALLEL a unei cereri SELECT",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul tabeleor organizate ca index (index organized), acestea se pot partitiona?",
+        "answers": [
+          {
+            "text": "Da, daca atributele dupa care se face partitionarea nu sunt o submultime a cheii primare.",
+            "correct": false
+          },
+          {
+            "text": "Nu",
+            "correct": false
+          },
+          {
+            "text": "Da, daca atributele dupa care se face partitionarea sunt o submultime a cheii primare.",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Valoarea implicita pentru INITRANS in cazul tabelelor este:",
+        "answers": [
+          {
+            "text": "2",
+            "correct": false
+          },
+          {
+            "text": "1",
+            "correct": true
+          },
+          {
+            "text": "255",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul tabelelor partitionate:",
+        "answers": [
+          {
+            "text": "Liniile sunt impartite in mai multe grupuri",
+            "correct": true
+          },
+          {
+            "text": "Acestea sunt parte a unui cluster",
+            "correct": false
+          },
+          {
+            "text": "Inregistrarile sunt organizate ca arbore B",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul cererii CREATE TABLE, valoarea lui PCTFREE poate fi:",
+        "answers": [
+          {
+            "text": "Intre 1 si 99",
+            "correct": true
+          },
+          {
+            "text": "Intre 1 si 39",
+            "correct": false
+          },
+          {
+            "text": "Intre 1 si 9",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Daca INITIAL este 10M, NEXT este 20M, PCTINCREASE este 50 atunci extensia 3 va avea:",
+        "answers": [
+          {
+            "text": "15M",
+            "correct": false
+          },
+          {
+            "text": "30M",
+            "correct": true
+          },
+          {
+            "text": "45M",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul cererii CREATE TABLE, suma dintre PCTFREE si PCTUSED trebuie sa fie",
+        "answers": [
+          {
+            "text": "Intre 1 si 99",
+            "correct": false
+          },
+          {
+            "text": "Intre 1 si 100",
+            "correct": true
+          },
+          {
+            "text": "Intre 1 si 198",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul tabelelor paritionate, partitiile pot sa fie stocate in tablespace-uri diferite?",
+        "answers": [
+          {
+            "text": "Nu",
+            "correct": false
+          },
+          {
+            "text": "Doar daca au acelasi nume",
+            "correct": false
+          },
+          {
+            "text": "Da",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Procesul prin care Oracle ia o linie dintr-un bloc si o muta in alt bloc, lasand in locul ei un pointer se numeste:",
+        "answers": [
+          {
+            "text": "Indexarea pointerilor",
+            "correct": false
+          },
+          {
+            "text": "Inlantuirea liniilor (row chaining)",
+            "correct": false
+          },
+          {
+            "text": "Migrarea liniilor",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "In cazul tabelelor organizate ca index (index organized):",
+        "answers": [
+          {
+            "text": "Acestea sunt parte a unui cluster",
+            "correct": false
+          },
+          {
+            "text": "Liniile sunt impartite in mai multe grupuri",
+            "correct": false
+          },
+          {
+            "text": "Inregistrarile sunt organizate ca arbore B",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "In cazul tabelelor de tip cluster (clustered tables):",
+        "answers": [
+          {
+            "text": "Inregistrarile sunt organizate ca arbore B",
+            "correct": false
+          },
+          {
+            "text": "Liniile sunt impartite in mai multe grupuri",
+            "correct": false
+          },
+          {
+            "text": "Acestea sunt parte a unui grup de tabele avand in comun anumite coloane",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Procesul prin care Oracle ia o linie dintr-un bloc si o muta in alt bloc, lasand in locul ei un pointer se numeste:",
+        "answers": [
+          {
+            "text": "Inlantuirea liniilor (row chaining)",
+            "correct": false
+          },
+          {
+            "text": "Migrarea liniilor",
+            "correct": true
+          },
+          {
+            "text": "Indexarea pointerilor",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Procesul prin care o linie este sparta in mai multe bucati care sunt stocate in mai multe blocuri, se numeste:",
+        "answers": [
+          {
+            "text": "Inlantuirea liniilor (row chaining)",
+            "correct": true
+          },
+          {
+            "text": "Indexarea pointerilor",
+            "correct": false
+          },
+          {
+            "text": "Migrarea liniilor",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul tabelelor organizate ca index (index organized):",
+        "answers": [
+          {
+            "text": "Acestea sunt parte a unui cluster",
+            "correct": false
+          },
+          {
+            "text": "Inregistrarile sunt organizate ca arbore B",
+            "correct": true
+          },
+          {
+            "text": "Liniile sunt impartite in mai multe grupuri",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care afirmatie este adevarata:",
+        "answers": [
+          {
+            "text": "Daca exista o diferenta LOGGING – NOLOGGING intre tabela si tablespace automat se considera LOGGING",
+            "correct": false
+          },
+          {
+            "text": "Clauza LOGGING din CREATE TABLE are prioritate fata de un NOLOGGING al tablespace-ului in care se pune tabela.",
+            "correct": true
+          },
+          {
+            "text": "Clauza LOGGING din CREATE TABLESPACE are prioritate fata de un NOLOGGING de la crearea unei tabele in acel tablespace.",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul tabeleleor partitionate, partitile pot sa fie stocate in tablespace-uri diferite?",
+        "answers": [
+          {
+            "text": "Da",
+            "correct": true
+          },
+          {
+            "text": "Doar daca au acelasi nume",
+            "correct": false
+          },
+          {
+            "text": "Nu",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul tabeleor de tip cluster (clustered tables):",
+        "answers": [
+          {
+            "text": "Acestea sunt parte a unui grup de tabele avand in comun anumite coloane",
+            "correct": true
+          },
+          {
+            "text": "Liniile sunt impartite in mai multe grupuri",
+            "correct": false
+          },
+          {
+            "text": "Inregistrarile sunt organizate ca arbore B",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un rol este:",
+        "answers": [
+          {
+            "text": "O colectie de privilegii",
+            "correct": true
+          },
+          {
+            "text": "O colectie de profiluri si privilegii",
+            "correct": false
+          },
+          {
+            "text": "O colectie de profiluri",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul comenzii ALTER USER … ACCOUNT LOCK:",
+        "answers": [
+          {
+            "text": "Daca userul era conectat este deconectat.",
+            "correct": false
+          },
+          {
+            "text": "Celelalte doua variante sunt false",
+            "correct": false
+          },
+          {
+            "text": "Sesiunea curenta nu este afectata.",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Se pot asocia cote pentru utilizatori pe tablespace-urile temporare?",
+        "answers": [
+          {
+            "text": "Da",
+            "correct": false
+          },
+          {
+            "text": "Nu",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "In momentul blocarii unui cont (LOCK), daca userul e logat la acel moment:",
+        "answers": [
+          {
+            "text": "Sesiunea va fi afectata de schimbare",
+            "correct": false
+          },
+          {
+            "text": "Sesiunea nu va fi afectata de schimbare",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Valoarea curenta (FALSE) a lui RESOURCE_LIMIT se poate modifica prin:",
+        "answers": [
+          {
+            "text": "ALTER USER SET RESOURCE_LIMIT=TRUE",
+            "correct": false
+          },
+          {
+            "text": "ALTER SYSTEM SET RESOURCE_LIMIT=TRUE",
+            "correct": true
+          },
+          {
+            "text": "ALTER SESSION SET RESOURCE_LIMIT=TRUE",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul unui user identificat prin parola, care dintre parolele de mai jos este corecta:",
+        "answers": [
+          {
+            "text": "A123456789012345678901234567890",
+            "correct": false
+          },
+          {
+            "text": "PA_$#ROLA$#_USER12345678901234",
+            "correct": true
+          },
+          {
+            "text": "_PAROLA_USER_1",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Prin intermediul profilului se pot restrictiona printre altele:",
+        "answers": [
+          {
+            "text": "Numarul de procese de background per user",
+            "correct": false
+          },
+          {
+            "text": "Resurse referitoare la spatiul alocat pe disc",
+            "correct": false
+          },
+          {
+            "text": "Resurse referitoare la sistem si la parola",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Prin profiluri se limiteaza printre altele:",
+        "answers": [
+          {
+            "text": "Drepturile asupra tabelelor",
+            "correct": false
+          },
+          {
+            "text": "Memoria folosita pentru acel user",
+            "correct": true
+          },
+          {
+            "text": "Timpul de acces la disc",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Privilegiile sunt de doua tipuri:",
+        "answers": [
+          {
+            "text": "Penru useri sau pentru sistem",
+            "correct": false
+          },
+          {
+            "text": "Temporare sau permanente",
+            "correct": false
+          },
+          {
+            "text": "Obiect sau sistem",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Daca este atinsa o limita a profilului la nivel de operatie (call) atunci:",
+        "answers": [
+          {
+            "text": "Tranzactia curenta este anulata",
+            "correct": false
+          },
+          {
+            "text": "Doar operatia curenta este anulata",
+            "correct": true
+          },
+          {
+            "text": "Userul este deconectat",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Cand cota unui user este modificata la valoarea 0 (aceasta fiind o valoare mai mica decat spatiul ocupat la acel moment de acel user in acel tablespace) atunci in acel tablespace:",
+        "answers": [
+          {
+            "text": "Nu se mai pot crea noi obiecte",
+            "correct": true
+          },
+          {
+            "text": "Obiectele existente sunt sterse",
+            "correct": false
+          },
+          {
+            "text": "Tabelele existente sunt golite",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Privilegiul CREATE TABLE este un:",
+        "answers": [
+          {
+            "text": "Privilegiu care afecteaza obiectele din orice schema",
+            "correct": false
+          },
+          {
+            "text": "Privilegiu sistem",
+            "correct": true
+          },
+          {
+            "text": "Privilegiu obiect",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Prin comanda ALTER PROFILE se poate schimba:",
+        "answers": [
+          {
+            "text": "Celelalte doua variante sunt false",
+            "correct": true
+          },
+          {
+            "text": "Cota pe disc a userului unui tablespace",
+            "correct": false
+          },
+          {
+            "text": "Numele userului",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Cand cota unui user intr-un tablespace e trecuta pe o valoare mai mica decat spatiul ocupat:",
+        "answers": [
+          {
+            "text": "Nu se mai pot crea obiecte noi dar cele existente pot creste",
+            "correct": false
+          },
+          {
+            "text": "Nu se mai pot crea obiecte noi iar cele existente nu pot creste",
+            "correct": true
+          },
+          {
+            "text": "Se pot crea obiecte noi dar cele existente nu mai pot creste",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul unui user identificat prin parola, care dintre parolele de mai jos este gresita:",
+        "answers": [
+          {
+            "text": "A12345678901234567891234567890",
+            "correct": false
+          },
+          {
+            "text": "PA_$#ROLA$#_USER12345678901234",
+            "correct": false
+          },
+          {
+            "text": "PAROLA_USER_1_1234%67890123",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Daca este atinsa o limita a profilului la nivel de operatie (call) atunci:",
+        "answers": [
+          {
+            "text": "Userul e deconectat",
+            "correct": false
+          },
+          {
+            "text": "Doar operatia curenta este anulata",
+            "correct": true
+          },
+          {
+            "text": "Tranzactia curenta este anulata",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "“Binning”: daca avem o cutie (“bin”) conținând valorile 4, 8, 9, 15, prin netezirea folosind capetele intervalului obținem:",
+        "answers": [
+          {
+            "text": "4, 4, 15, 15",
+            "correct": false
+          },
+          {
+            "text": "9, 9, 9, 9",
+            "correct": false
+          },
+          {
+            "text": "4, 4, 4, 15",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Sumarul de 5 numere (Five number summary) conține printre altele:",
+        "answers": [
+          {
+            "text": "Cuartilele și Cvintilele",
+            "correct": false
+          },
+          {
+            "text": "Minimul și maximul",
+            "correct": true
+          },
+          {
+            "text": "Media și mediana",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "În cazul normalizării Min-Max, mulțimea {1, 2, 3, 6} devine:",
+        "answers": [
+          {
+            "text": "{0.2, 0.4, 0.6, 0.9}",
+            "correct": false
+          },
+          {
+            "text": "{0.1, 0.2, 0.3, 0.6}",
+            "correct": false
+          },
+          {
+            "text": "{0.0, 0.2, 0.4, 1}",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Suportul unei reguli de asociere X → Y este dat de formula:",
+        "answers": [
+          {
+            "text": "Suport (X∪Y) / Suport (X)",
+            "correct": false
+          },
+          {
+            "text": "Suport (X∪Y)",
+            "correct": true
+          },
+          {
+            "text": "Suport (X∩Y)",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Varianța (Dispersia) este:",
+        "answers": [
+          {
+            "text": "Radical din abaterea standard sigma",
+            "correct": false
+          },
+          {
+            "text": "Pătratul abaterii standard sigma",
+            "correct": true
+          },
+          {
+            "text": "Varianța nu este legata de abaterea standard sigma",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Discretizarea face parte din etapa de:",
+        "answers": [
+          {
+            "text": "Vizualizare",
+            "correct": false
+          },
+          {
+            "text": "Preprocesarea datelor",
+            "correct": true
+          },
+          {
+            "text": "Extragerea modelelor și descoperirea cunoștințelor",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Algoritmii de clasificare sunt de tipul:",
+        "answers": [
+          {
+            "text": "Descriptiv",
+            "correct": false
+          },
+          {
+            "text": "Prescriptiv",
+            "correct": false
+          },
+          {
+            "text": "Predictiv",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "În cazul normalizării de tip Scalare zecimala, mulțimea {1, 2, 3, 6} devine:",
+        "answers": [
+          {
+            "text": "{0.2, 0.4, 0.6, 0.9}",
+            "correct": false
+          },
+          {
+            "text": "{0.0, 0.2, 0.4, 1}",
+            "correct": false
+          },
+          {
+            "text": "{0.1, 0.2, 0.3, 0.6}",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "În cazul căutării mulțimilor frecvente în datele de vânzări ale unui supermarket, reducerea dimensionalității (“Dimensionality reduction”) trebuie să păstreze:",
+        "answers": [
+          {
+            "text": "Prețul",
+            "correct": false
+          },
+          {
+            "text": "Produsul",
+            "correct": true
+          },
+          {
+            "text": "Furnizorul",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "În cazul unei reguli de asociere X → Y, X si Y sunt:",
+        "answers": [
+          {
+            "text": "Mulțimi frecvente de articole",
+            "correct": false
+          },
+          {
+            "text": "Mulțimi de clase",
+            "correct": false
+          },
+          {
+            "text": "Mulțimi de articole",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Încrederea unei reguli de asociere X → Y este dată de formula:",
+        "answers": [
+          {
+            "text": "Suport (X∪Y)",
+            "correct": false
+          },
+          {
+            "text": "Suport (X∩Y)",
+            "correct": false
+          },
+          {
+            "text": "Suport (X∪Y) / Suport (X)",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Este Data mining:",
+        "answers": [
+          {
+            "text": "Căutarea unei persoane într-o bază de date",
+            "correct": false
+          },
+          {
+            "text": "Calcularea datelor rezumate (min, max) într-un tabel",
+            "correct": false
+          },
+          {
+            "text": "Folosirea unui arbore de decizie",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Algoritmii de clustering sunt de tipul:",
+        "answers": [
+          {
+            "text": "Predictiv",
+            "correct": false
+          },
+          {
+            "text": "Prescriptiv",
+            "correct": false
+          },
+          {
+            "text": "Descriptiv",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Ca dată despre o persoană, genul (masculin, feminin) este un atribut de tip:",
+        "answers": [
+          {
+            "text": "Binar asimetric",
+            "correct": false
+          },
+          {
+            "text": "Interval",
+            "correct": false
+          },
+          {
+            "text": "Binar simetric",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Gradele militare sunt valori de tip:",
+        "answers": [
+          {
+            "text": "Ordinal",
+            "correct": true
+          },
+          {
+            "text": "Nominal",
+            "correct": false
+          },
+          {
+            "text": "Interval",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "În cazul căutării mulțimilor frecvente în datele de vânzări ale unui supermarket, reducerea dimensionalității (“Dimensionality reduction”) trebuie să păstreze:",
+        "answers": [
+          {
+            "text": "Furnizorul",
+            "correct": false
+          },
+          {
+            "text": "Produsul",
+            "correct": true
+          },
+          {
+            "text": "Prețul",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Varianta (Dispersia) mulțimii {0, 1, 2, 3, 4} este:",
+        "answers": [
+          {
+            "text": "10",
+            "correct": false
+          },
+          {
+            "text": "2",
+            "correct": true
+          },
+          {
+            "text": "Intre 3 si 4",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Pentru recunoașterea punctelor izolate (outliers) se folosește valoarea 1,5 * IQR. În acest caz, cât ar trebui sa e X din mulțimea {0, 1, 2, X} pentru a fi considerat punct izolat:",
+        "answers": [
+          {
+            "text": "5.5",
+            "correct": true
+          },
+          {
+            "text": "-2.5",
+            "correct": false
+          },
+          {
+            "text": "-1,5",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Deviația (abaterea) standard a mulțimii {1, 1, 1, 1, 1} este:",
+        "answers": [
+          {
+            "text": "1",
+            "correct": false
+          },
+          {
+            "text": "0",
+            "correct": true
+          },
+          {
+            "text": "Intre 1 si 2",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "O instanta Oracle se compune din:",
+        "answers": [
+          {
+            "text": "Un server Oracle si o baza de date Oracle",
+            "correct": false
+          },
+          {
+            "text": "O zona de memorie si o baza de date Oracle",
+            "correct": false
+          },
+          {
+            "text": "O zona de memorie si procese de background",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Procesul server este:",
+        "answers": [
+          {
+            "text": "Unul dintre procesele de background",
+            "correct": false
+          },
+          {
+            "text": "Un proces care deserveste unul sau mai multe procese client",
+            "correct": true
+          },
+          {
+            "text": "Un proces care apartine SGA",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "DBWRITER este parte",
+        "answers": [
+          {
+            "text": "Procesului client",
+            "correct": false
+          },
+          {
+            "text": "Procesului server",
+            "correct": false
+          },
+          {
+            "text": "Instantei Oracle",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Procesul Log Writer scrie pe disc:",
+        "answers": [
+          {
+            "text": "Inainte ca DBWRITER sa scrie pe disc",
+            "correct": true
+          },
+          {
+            "text": "Dupa ce DBWRITER scrie pe disc",
+            "correct": false
+          },
+          {
+            "text": "In acelasi timp cu DBWRITER",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Buffer cache este parte a:",
+        "answers": [
+          {
+            "text": "Procesului client",
+            "correct": false
+          },
+          {
+            "text": "PGA",
+            "correct": false
+          },
+          {
+            "text": "SGA",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Etapele procesarii unei cereri sunt, in ordine:",
+        "answers": [
+          {
+            "text": "Execute Fetch Parse",
+            "correct": false
+          },
+          {
+            "text": "Parse Execute Fetch",
+            "correct": true
+          },
+          {
+            "text": "Execute Parse Fetch",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Care este afirmatia corecta:",
+        "answers": [
+          {
+            "text": "DBA=rol, SYSDBA=privilegiu",
+            "correct": true
+          },
+          {
+            "text": "DBA=privilegiu, SYSDBA=rol",
+            "correct": false
+          },
+          {
+            "text": "Ambele sunt privilegii",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Poti crea o baza de date daca esti:",
+        "answers": [
+          {
+            "text": "DBA",
+            "correct": false
+          },
+          {
+            "text": "SYSDBA",
+            "correct": true
+          },
+          {
+            "text": "SYSDBA sau SYSOPER",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Redenumirea fisierelor de date in care se stocheaza baza de date se poate face:",
+        "answers": [
+          {
+            "text": "Cu instanta pornita",
+            "correct": false
+          },
+          {
+            "text": "Cu baza de date deschisa",
+            "correct": false
+          },
+          {
+            "text": "Cu baza de date montata",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Crearea unei baze de date se face",
+        "answers": [
+          {
+            "text": "Cu instanta pornita",
+            "correct": true
+          },
+          {
+            "text": "Cu baza de date montata",
+            "correct": false
+          },
+          {
+            "text": "Cu procesele de backgroud oprite",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Deschiderea fișierelor de date se face la momentul:",
+        "answers": [
+          {
+            "text": "Pornirea instantei",
+            "correct": false
+          },
+          {
+            "text": "Deschiderii BD",
+            "correct": true
+          },
+          {
+            "text": "Montarii BD",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Recuperarea dupa incident este necesara cand oprirea s-a facut in modul:",
+        "answers": [
+          {
+            "text": "Tranzactional, Imediat si Abort",
+            "correct": false
+          },
+          {
+            "text": "Imediat si Abort",
+            "correct": false
+          },
+          {
+            "text": "Abort",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Vederile dinamice pentru performante se pot consulta:",
+        "answers": [
+          {
+            "text": "Unele dintre ele dupa pornirea instantei",
+            "correct": true
+          },
+          {
+            "text": "Doar dupa montarea BD",
+            "correct": false
+          },
+          {
+            "text": "Doar dupa deschiderea BD",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Ce poate fi stocat in mai mult de un fisier de date:",
+        "answers": [
+          {
+            "text": "Extensie, Segment si Tablespace",
+            "correct": false
+          },
+          {
+            "text": "Segment si Tablespace",
+            "correct": true
+          },
+          {
+            "text": "Tablespace",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fisierele de control sunt scrise:",
+        "answers": [
+          {
+            "text": "In paralel (multiplexat)",
+            "correct": true
+          },
+          {
+            "text": "In serie (unul dupa altul)",
+            "correct": false
+          },
+          {
+            "text": "Nici a nici b nu sunt corecte",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fisirele de control sunt de tipul",
+        "answers": [
+          {
+            "text": "Text",
+            "correct": false
+          },
+          {
+            "text": "XML",
+            "correct": false
+          },
+          {
+            "text": "Binar",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Membrii unui grup de fisiere redo log sunt scrisi:",
+        "answers": [
+          {
+            "text": "In paralel (multiplexat)",
+            "correct": true
+          },
+          {
+            "text": "In serie (unul dupa altul)",
+            "correct": false
+          },
+          {
+            "text": "Nici a nici b nu sunt corecte",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dimensiunea membrilor unui grup de fisiere redo log:",
+        "answers": [
+          {
+            "text": "Poate fi diferita",
+            "correct": false
+          },
+          {
+            "text": "Trebuie sa fie aceeasi",
+            "correct": true
+          },
+          {
+            "text": "a si b sunt false",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un fisier de date poate sa apartina:",
+        "answers": [
+          {
+            "text": "La doua tablespace-uri diferite",
+            "correct": false
+          },
+          {
+            "text": "Un singur segment",
+            "correct": false
+          },
+          {
+            "text": "Unui singur tablespace",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Segmentele temporare se pot stoca:",
+        "answers": [
+          {
+            "text": "Doar in tablespace-uri temporare",
+            "correct": false
+          },
+          {
+            "text": "In orice tablespace",
+            "correct": true
+          },
+          {
+            "text": "In orice tablespace cu exceptia celui SYSTEM",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Stergerea unui fisier de control se face:",
+        "answers": [
+          {
+            "text": "Cu instanta oprita",
+            "correct": true
+          },
+          {
+            "text": "Cu baza de date doar montata",
+            "correct": false
+          },
+          {
+            "text": "Cu baza de date deschisa",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Fisierele de redo-log sunt scrie de:",
+        "answers": [
+          {
+            "text": "Procesul server",
+            "correct": false
+          },
+          {
+            "text": "Procesul client",
+            "correct": false
+          },
+          {
+            "text": "Nici a nici b nu sunt corecte // se foloseste procesul LGWR",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Care afirmatie este corecta:",
+        "answers": [
+          {
+            "text": "Cand apare un checkpoint se face si un log-switch",
+            "correct": false
+          },
+          {
+            "text": "Cand apare un log-switch se face si un checkpoint",
+            "correct": true
+          },
+          {
+            "text": "Nici a nici b nu sunt corecte",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Parametrul LOG_CHECKPOINT_INTERVAL se masoara in:",
+        "answers": [
+          {
+            "text": "Minute",
+            "correct": false
+          },
+          {
+            "text": "Blocuri",
+            "correct": true
+          },
+          {
+            "text": "Secunde",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Dictionarul de date al sistemului se memoreaza in:",
+        "answers": [
+          {
+            "text": "Tablespace-ul DBA",
+            "correct": false
+          },
+          {
+            "text": "Tablespace-ul SYSTEM",
+            "correct": true
+          },
+          {
+            "text": "Intr-un tablespace specificat la instalare",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Clauza DEFAULT STORAGE are efect in dimensionarea:",
+        "answers": [
+          {
+            "text": "Segmentelor",
+            "correct": false
+          },
+          {
+            "text": "Extensiilor",
+            "correct": true
+          },
+          {
+            "text": "Tablespace-urilor",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In functie de gestiunea extensiilor, un tablespace poate fi de tipul:",
+        "answers": [
+          {
+            "text": "LMT sau DMT",
+            "correct": true
+          },
+          {
+            "text": "DMT sau FMT",
+            "correct": false
+          },
+          {
+            "text": "LMT sau SMT",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Clauza AUTOEXTEND permite cresterea dimensiunii:",
+        "answers": [
+          {
+            "text": "Fisierelor de date",
+            "correct": true
+          },
+          {
+            "text": "Segmentelor",
+            "correct": false
+          },
+          {
+            "text": "Extensiilor",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "La trecerea unui tablespace OFFLINE se pot folosi parametrii:",
+        "answers": [
+          {
+            "text": "NORMAL si IMMEDIATE",
+            "correct": true
+          },
+          {
+            "text": "TEMPORARY si UNIFORM",
+            "correct": false
+          },
+          {
+            "text": "NORMAL si FLASHBACK",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace poate deveni READ ONLY:",
+        "answers": [
+          {
+            "text": "Inca de la creare",
+            "correct": false
+          },
+          {
+            "text": "Dupa ce a fost creat READ-WRITE",
+            "correct": true
+          },
+          {
+            "text": "a si b sunt adevarate",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Un tablespace poate deveni OFFLINE:",
+        "answers": [
+          {
+            "text": "Inca de la creare",
+            "correct": false
+          },
+          {
+            "text": "Dupa ce a fost creat ONLINE",
+            "correct": false
+          },
+          {
+            "text": "a si b sunt adevarate",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "In cazul cererii CREATE TABLE, suma dintre PCTFREE si PCTUSED trebuie sa fie:",
+        "answers": [
+          {
+            "text": "Intre 1 si 9",
+            "correct": false
+          },
+          {
+            "text": "Intre 1 si 99, vezi ca e gresit, e 1-100 ala care a pus duplicate",
+            "correct": true
+          },
+          {
+            "text": "Intre 1 si 39",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Daca INITIAL este 10M, NEXT este 20M, PCTINCREASE este 50 atunci extensia 3 va avea:",
+        "answers": [
+          {
+            "text": "15M",
+            "correct": false
+          },
+          {
+            "text": "30M",
+            "correct": true
+          },
+          {
+            "text": "45M",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "HWM poate fi mutat in sus:",
+        "answers": [
+          {
+            "text": "Ca efect al unor comenzi DML",
+            "correct": true
+          },
+          {
+            "text": "Ca efect al unor comenzi DDL",
+            "correct": false
+          },
+          {
+            "text": "Nici a nici b nu sunt corecte",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "HWM poate fi mutat in jos:",
+        "answers": [
+          {
+            "text": "Ca efect al unor comenzi DML",
+            "correct": false
+          },
+          {
+            "text": "Ca efect al unor comenzi DDL",
+            "correct": true
+          },
+          {
+            "text": "Nici a nici b nu sunt corecte",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Cand cota unui user este modificata la valoarea 0 (aceasta fiind o valoare mai mica decat spatiul ocupat la acel moment de acel user in acel tablespace) atunci in acel tablespace:",
+        "answers": [
+          {
+            "text": "Nu se mai pot crea noi obiecte",
+            "correct": true
+          },
+          {
+            "text": "Obiectele extinse sunt sterse",
+            "correct": false
+          },
+          {
+            "text": "Tabelele existente sunt golite",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Prin intermediul profilului se pot restrictiona printre altele:",
+        "answers": [
+          {
+            "text": "Resurse referitoare la sistem si parola",
+            "correct": true
+          },
+          {
+            "text": "Resurse referitoare la spatiul alocat pe disc",
+            "correct": false
+          },
+          {
+            "text": "Numarul de procese de background per user",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "In cazul comenzii ALTER USER … ACCOUNT LOCK:",
+        "answers": [
+          {
+            "text": "Daca userul era conectat este deconectat",
+            "correct": false
+          },
+          {
+            "text": "Sesiunea curenta nu este afectata",
+            "correct": true
+          },
+          {
+            "text": "a si b sunt false",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "question": "Prin comanda ALTER PROFILE se poate schimba:",
+        "answers": [
+          {
+            "text": "Numele userului",
+            "correct": false
+          },
+          {
+            "text": "Cota pe disc a userului pe un tablespace",
+            "correct": false
+          },
+          {
+            "text": "Celelalte doua variante sunt false",
+            "correct": true
+          }
+        ]
+      },
+      {
+        "question": "Privilegiul CREATE TABLE este un:",
+        "answers": [
+          {
+            "text": "Privilegiu obiect",
+            "correct": false
+          },
+          {
+            "text": "Privilegiu sistem",
+            "correct": true
+          },
+          {
+            "text": "Privilegiu care afecteaza obiectele din orice schema",
+            "correct": false
+          }
+        ]
+      }
+    ];
+
+    let quizzes = [];
+    let correctAnswersCount = 0; // Track the number of correct answers
+
+    async function loadQuiz() {
+      const select = document.getElementById('courseSelect').value;
+
+      if (select === '2020-2021.json') {
+        quizzes = A;
+      } else {
+        quizzes = B;
+      }
+
+      // Check if random order for questions is selected
+      const randomOrder = document.getElementById('randomToggle').checked;
+
+      if (randomOrder) {
+        quizzes.sort(() => 0.5 - Math.random());
+      }
+
+      const quizContainer = document.getElementById('quiz-container');
+      quizContainer.innerHTML = '';
+
+      // Hide course selection after loading
+      document.getElementById('courseSelection').style.display = 'none';
+
+      quizzes.forEach((quiz, index) => {
+        const quizSection = document.createElement('div');
+        quizSection.id = `quiz-${index + 1}`;
+        quizSection.classList.add('quiz-section');
+        if (index === 0) quizSection.classList.add('active');
+
+        // Check if random order for answers is selected
+        const answerRandomOrder = document.getElementById('answerRandomToggle').checked;
+
+        const answers = answerRandomOrder ? quiz.answers.sort(() => 0.5 - Math.random()) : quiz.answers;
+
+        quizSection.innerHTML = `
+          <div class="question-info">Întrebarea ${index + 1} din ${quizzes.length}</div>
+          <div class="question">${quiz.question}</div>
+          ${answers.map((answer, i) => `
+            <div class="answer">
+              <input type="radio" name="q${index + 1}" id="q${index + 1}-answer${i}" value="${answer.correct ? 1 : 0}" /> 
+              <span onclick="document.getElementById('q${index + 1}-answer${i}').click();">${answer.text}</span>
+            </div>`).join('')}
+          <div id="feedback-${index + 1}" class="feedback"></div>
+          <div id="correct-answer-${index + 1}" class="feedback" style="color: blue;"></div>
+          <button class="next-btn" onclick="checkAnswer(${index + 1}, 1)">Submit</button>
+        `;
+
+        quizContainer.appendChild(quizSection);
+      });
+    }
+
+    function checkAnswer(quizNumber, correctAnswer) {
+      const selectedOption = document.querySelector(`input[name="q${quizNumber}"]:checked`);
+      const feedback = document.getElementById(`feedback-${quizNumber}`);
+      const correctAnswerDisplay = document.getElementById(`correct-answer-${quizNumber}`);
+      const quiz = quizzes[quizNumber - 1];
+
+      if (selectedOption) {
+        if (parseInt(selectedOption.value) === correctAnswer) {
+          feedback.textContent = "Răspuns corect!";
+          feedback.style.color = "green";
+          correctAnswersCount++; // Increment correct answers count
+        } else {
+          feedback.textContent = "Răspuns greșit!";
+          feedback.style.color = "red";
+          correctAnswerDisplay.textContent = `Răspunsul corect este: ${quiz.answers.find(a => a.correct).text}`;
+        }
+
+        const nextButton = document.querySelector(`#quiz-${quizNumber} .next-btn`);
+        nextButton.textContent = "Următoarea Întrebare";
+        nextButton.onclick = function () {
+          goToNextQuestion(quizNumber + 1);
+        };
+      } else {
+        feedback.textContent = "Selectați un răspuns!";
+        feedback.style.color = "orange";
+      }
+    }
+
+    function goToNextQuestion(nextQuizNumber) {
+      document.querySelector(`#quiz-${nextQuizNumber - 1}`).classList.remove("active");
+      const nextQuiz = document.getElementById(`quiz-${nextQuizNumber}`);
+      if (nextQuiz) {
+        nextQuiz.classList.add("active");
+        document.getElementById(`feedback-${nextQuizNumber - 1}`).textContent = '';
+        document.getElementById(`correct-answer-${nextQuizNumber - 1}`).textContent = '';
+      } else {
+        // Quiz completed, show results
+        alert(`Quiz complet! Felicitări! Ați răspuns corect la ${correctAnswersCount} din ${quizzes.length} întrebări.`);
+      }
+    }
+  </script>
+</body>
+
+</html>
